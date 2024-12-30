@@ -28,6 +28,8 @@ const profileRequestSchema = z.object({
 
 type ProfileRequest = z.infer<typeof profileRequestSchema>;
 
+profileRoute.use(authorize);
+
 profileRoute.get("/api/profiles", async (req: Request, res: Response) => {
   const { page = 1, size = 10 } = req.query;
 
@@ -47,106 +49,94 @@ profileRoute.get("/api/profiles", async (req: Request, res: Response) => {
 });
 
 // Get my profile
-profileRoute.get(
-  "/api/profiles/me",
-  authorize,
-  async (req: Request, res: Response) => {
-    const userId = req.user?.sub;
+profileRoute.get("/api/profiles/me", async (req: Request, res: Response) => {
+  const userId = req.user?.sub;
 
-    const profile = await db
-      .select()
-      .from(profileInPrivate)
-      .where(eq(profileInPrivate.userId, userId))
-      .then(takeUniqueOrThrow);
+  const profile = await db
+    .select()
+    .from(profileInPrivate)
+    .where(eq(profileInPrivate.userId, userId))
+    .then(takeUniqueOrThrow);
 
-    const interests = await db
-      .select({ id: interestInPrivate.id, name: interestInPrivate.name })
-      .from(userInterestInPrivate)
-      .innerJoin(
-        interestInPrivate,
-        eq(userInterestInPrivate.interestId, interestInPrivate.id)
-      )
-      .where(eq(userInterestInPrivate.userId, userId));
+  const interests = await db
+    .select({ id: interestInPrivate.id, name: interestInPrivate.name })
+    .from(userInterestInPrivate)
+    .innerJoin(
+      interestInPrivate,
+      eq(userInterestInPrivate.interestId, interestInPrivate.id)
+    )
+    .where(eq(userInterestInPrivate.userId, userId));
 
-    res.json({
-      ...profile,
-      interests,
-    });
+  res.json({
+    ...profile,
+    interests,
+  });
+});
+
+profileRoute.post("/api/profiles", async (req: Request, res: Response) => {
+  const profile: ProfileRequest = req.body;
+
+  const { data, error } = profileRequestSchema.safeParse(profile);
+  if (!data || error) {
+    res.status(400).json(error);
+    return;
   }
-);
 
-profileRoute.post(
-  "/api/profiles",
-  authorize,
-  async (req: Request, res: Response) => {
-    const profile: ProfileRequest = req.body;
+  const interests = data.interests;
+  const userId = req.user.sub;
 
-    const { data, error } = profileRequestSchema.safeParse(profile);
-    if (!data || error) {
-      res.status(400).json(error);
-      return;
+  // Check if profile already created
+  const existedProfile = await db
+    .select()
+    .from(profileInPrivate)
+    .where(eq(profileInPrivate.userId, userId))
+    .then(takeUniqueOrThrow);
+
+  if (existedProfile) {
+    res.status(400).json({
+      message: "Profile already created",
+    });
+    return;
+  }
+
+  await db.transaction(async (tx) => {
+    await tx.insert(profileInPrivate).values({
+      ...data,
+      userId,
+    });
+
+    if (interests.length > 0) {
+      await tx.insert(userInterestInPrivate).values(
+        interests.map((interestId) => ({
+          userId,
+          interestId,
+        }))
+      );
     }
+  });
 
-    const interests = data.interests;
-    const userId = req.user.sub;
+  res.sendStatus(200);
+});
 
-    // Check if profile already created
-    const existedProfile = await db
-      .select()
-      .from(profileInPrivate)
-      .where(eq(profileInPrivate.userId, userId))
-      .then(takeUniqueOrThrow);
+profileRoute.put("/api/profiles", async (req: Request, res: Response) => {
+  const profile: ProfileRequest = req.body;
 
-    if (existedProfile) {
-      res.status(400).json({
-        message: "Profile already created",
-      });
-      return;
-    }
+  const { data, error } = profileRequestSchema.safeParse(profile);
+  if (!data || error) {
+    res.status(400).json(error);
+    return;
+  }
+  const userId = req.user.sub;
 
-    await db.transaction(async (tx) => {
-      await tx.insert(profileInPrivate).values({
+  await db.transaction(async (tx) => {
+    await tx
+      .update(profileInPrivate)
+      .set({
         ...data,
         userId,
-      });
+      })
+      .where(eq(profileInPrivate.userId, userId));
+  });
 
-      if (interests.length > 0) {
-        await tx.insert(userInterestInPrivate).values(
-          interests.map((interestId) => ({
-            userId,
-            interestId,
-          }))
-        );
-      }
-    });
-
-    res.sendStatus(200);
-  }
-);
-
-profileRoute.put(
-  "/api/profiles",
-  authorize,
-  async (req: Request, res: Response) => {
-    const profile: ProfileRequest = req.body;
-
-    const { data, error } = profileRequestSchema.safeParse(profile);
-    if (!data || error) {
-      res.status(400).json(error);
-      return;
-    }
-    const userId = req.user.sub;
-
-    await db.transaction(async (tx) => {
-      await tx
-        .update(profileInPrivate)
-        .set({
-          ...data,
-          userId,
-        })
-        .where(eq(profileInPrivate.userId, userId));
-    });
-
-    res.sendStatus(200);
-  }
-);
+  res.sendStatus(200);
+});
