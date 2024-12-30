@@ -12,6 +12,8 @@ app.use(express.json());
 // Define routes
 app.use(profileRoute);
 
+app.get("/healthz", (_, res) => res.sendStatus(200));
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
