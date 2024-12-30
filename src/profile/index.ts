@@ -13,7 +13,7 @@ export const profileRoute = express.Router();
 
 profileRoute.use(authorize);
 
-profileRoute.get("/api/profiles", async (req: Request, res: Response) => {
+profileRoute.get("/", async (req: Request, res: Response) => {
   const { page = 1, size = 10 } = req.query;
 
   const _page = parseInt(page.toString());
@@ -27,7 +27,7 @@ profileRoute.get("/api/profiles", async (req: Request, res: Response) => {
 });
 
 // Get my profile
-profileRoute.get("/api/profiles/me", async (req: Request, res: Response) => {
+profileRoute.get("/me", async (req: Request, res: Response) => {
   const userId = req.user?.sub;
 
   const profileWithInterests = await getProfileWithInterestsByUserId(userId);
@@ -35,7 +35,7 @@ profileRoute.get("/api/profiles/me", async (req: Request, res: Response) => {
   res.json(profileWithInterests);
 });
 
-profileRoute.post("/api/profiles", async (req: Request, res: Response) => {
+profileRoute.post("/", async (req: Request, res: Response) => {
   const profile = req.body;
 
   const { data, error } = profileRequestSchema.safeParse(profile);
@@ -60,7 +60,7 @@ profileRoute.post("/api/profiles", async (req: Request, res: Response) => {
   res.sendStatus(200);
 });
 
-profileRoute.put("/api/profiles", async (req: Request, res: Response) => {
+profileRoute.put("/", async (req: Request, res: Response) => {
   const profile = req.body;
 
   const { data, error } = profileRequestSchema.safeParse(profile);

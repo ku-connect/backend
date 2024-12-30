@@ -10,7 +10,7 @@ const PORT = process.env.PORT || "4000";
 app.use(express.json());
 
 // Define routes
-app.use(profileRoute);
+app.use("/api/profiles", profileRoute);
 
 app.get("/healthz", (_, res) => res.sendStatus(200));
 
