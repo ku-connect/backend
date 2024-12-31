@@ -1,6 +1,8 @@
 import express from "express";
+import { EventEmitter } from "events";
 
 import { profileRoute } from "./profile";
+import { events, notificationEvent } from "./notification/event";
 
 const app = express();
 
@@ -13,6 +15,11 @@ app.use(express.json());
 app.use("/api/profiles", profileRoute);
 
 app.get("/healthz", (_, res) => res.sendStatus(200));
+
+app.get("/noti", async (req, res) => {
+  notificationEvent.emit(events.NEW_MATCH, { message: "Hello" });
+  res.send("Hello World");
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
