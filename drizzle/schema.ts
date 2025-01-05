@@ -19,8 +19,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
-export const auth = pgSchema("auth");
 export const _private = pgSchema("private");
+export const auth = pgSchema("auth");
 export const aalLevelInAuth = auth.enum("aal_level", ["aal1", "aal2", "aal3"]);
 export const codeChallengeMethodInAuth = auth.enum("code_challenge_method", [
   "s256",
@@ -201,6 +201,7 @@ export const profileInPrivate = _private.table(
       foreignColumns: [usersInAuth.id],
       name: "profile_user_id_fkey",
     }).onDelete("cascade"),
+    unique("profile_uniq_1").on(table.userId),
   ]
 );
 
@@ -229,6 +230,37 @@ export const userInterestInPrivate = _private.table(
     primaryKey({
       columns: [table.userId, table.interestId],
       name: "user_interest_pkey",
+    }),
+  ]
+);
+
+export const interactionsInPrivate = _private.table(
+  "interactions",
+  {
+    fromUserId: uuid("from_user_id").notNull(),
+    toUserId: uuid("to_user_id").notNull(),
+    liked: boolean(),
+    createdTime: timestamp("created_time", { mode: "string" }).default(
+      sql`CURRENT_TIMESTAMP`
+    ),
+    updatedTime: timestamp("updated_time", { mode: "string" }).default(
+      sql`CURRENT_TIMESTAMP`
+    ),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.fromUserId],
+      foreignColumns: [usersInAuth.id],
+      name: "interactions_from_user_id_fkey",
+    }),
+    foreignKey({
+      columns: [table.toUserId],
+      foreignColumns: [usersInAuth.id],
+      name: "interactions_to_user_id_fkey",
+    }),
+    primaryKey({
+      columns: [table.fromUserId, table.toUserId],
+      name: "interactions_pkey",
     }),
   ]
 );

@@ -6,5 +6,11 @@ export default defineConfig({
     url: process.env.DATABASE_URL as string,
   },
   schemaFilter: ["public", "private", "auth"],
-  tablesFilter: ["users", "profile", "interest", "user_interest"],
+  tablesFilter: [
+    "users",
+    "profile",
+    "interest",
+    "user_interest",
+    "interactions",
+  ],
 });

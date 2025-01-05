@@ -3,11 +3,9 @@ import { EventEmitter } from "events";
 export const notificationEvent = new EventEmitter();
 
 export const events = {
-  NEW_MATCH: "NEW_MATCH",
+  INTERACTION: "INTERACTION",
 };
 
-notificationEvent.on("NEW_MATCH", async (data) => {
-  console.log("Sending notification", data);
-  await new Promise((resolve) => setTimeout(resolve, 5000));
-  console.log("Notification received", data);
+notificationEvent.on(events.INTERACTION, async (data) => {
+  console.log("Send new interaction notification");
 });

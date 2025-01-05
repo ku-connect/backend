@@ -1,8 +1,4 @@
-import express, {
-  type NextFunction,
-  type Request,
-  type Response,
-} from "express";
+import { type NextFunction, type Request, type Response } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 
 const secretKey = process.env.JWT_SECRET as string;
@@ -22,11 +18,7 @@ export const authorize = async (
     if (err) {
       return res.status(401).json({ message: "Unauthorized!" });
     }
-
     req.user = decoded as JwtPayload;
-
-    console.log(req.user);
-
     next();
   });
 };
