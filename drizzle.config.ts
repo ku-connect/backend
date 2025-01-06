@@ -12,5 +12,6 @@ export default defineConfig({
     "interest",
     "user_interest",
     "interactions",
+    "notification",
   ],
 });

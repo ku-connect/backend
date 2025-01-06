@@ -1,11 +1,26 @@
 import { EventEmitter } from "events";
-
-export const notificationEvent = new EventEmitter();
+import { NotificationService } from "./service";
 
 export const events = {
   INTERACTION: "INTERACTION",
 };
 
-notificationEvent.on(events.INTERACTION, async (data) => {
-  console.log("Send new interaction notification");
-});
+export class NotificationEvent {
+  private event = new EventEmitter();
+  private notificationService: NotificationService;
+
+  public constructor(notificationService: NotificationService) {
+    this.notificationService = notificationService;
+
+    this.event.on(events.INTERACTION, async (fromUserId, toUserId) => {
+      await this.notificationService.sendNewInteractionNotification(
+        fromUserId,
+        toUserId
+      );
+    });
+  }
+
+  public sendNewInteractionEvent(fromUserId: string, toUserId: string) {
+    this.event.emit(events.INTERACTION, fromUserId, toUserId);
+  }
+}

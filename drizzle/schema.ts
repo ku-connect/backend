@@ -12,6 +12,8 @@ import {
   boolean,
   text,
   smallint,
+  pgPolicy,
+  bigserial,
   foreignKey,
   serial,
   date,
@@ -176,6 +178,31 @@ export const usersInAuth = auth.table(
       "users_email_change_confirm_status_check",
       sql`(email_change_confirm_status >= 0) AND (email_change_confirm_status <= 2)`
     ),
+  ]
+);
+
+export const notificationInPrivate = _private.table(
+  "notification",
+  {
+    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    userId: uuid("user_id").notNull(),
+    data: jsonb().notNull(),
+    type: varchar({ length: 255 }).notNull(),
+    readAt: timestamp("read_at", { mode: "string" }),
+    createdTime: timestamp("created_time", { mode: "date" }).default(
+      sql`CURRENT_TIMESTAMP`
+    ),
+    updatedTime: timestamp("updated_time", { mode: "date" }).default(
+      sql`CURRENT_TIMESTAMP`
+    ),
+  },
+  (table) => [
+    pgPolicy("Enable users to view their own data only", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(( SELECT auth.uid() AS uid) = user_id)`,
+    }),
   ]
 );
 
