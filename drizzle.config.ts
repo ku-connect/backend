@@ -1,17 +1,22 @@
 import { defineConfig } from "drizzle-kit";
 
+// console.log(process.env.DATABASE_URL)
+
 export default defineConfig({
   dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL as string,
   },
-  schemaFilter: ["public", "private", "auth"],
+  schemaFilter: ["public", "_private", "auth"],
   tablesFilter: [
     "users",
     "profile",
     "interest",
     "user_interest",
-    "interactions",
+    "interaction",
     "notification",
+    "room",
+    "chat",
+    "settings",
   ],
 });

@@ -8,6 +8,16 @@ export function getNotificationRoute(notificationService: NotificationService) {
 
   notificationRoute.use(authorize);
 
+  /**
+   * @swagger
+   * /api/notifications:
+   *   put:
+   *     description: Get my notifications
+   *     tags: [Notification]
+   *     responses:
+   *       200:
+   *         description: Returns a list of paginated notifications
+   */
   notificationRoute.get(
     "/",
     asyncHandler(async (req: Request, res: Response) => {

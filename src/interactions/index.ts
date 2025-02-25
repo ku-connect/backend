@@ -1,5 +1,5 @@
 import express, { type Request, type Response } from "express";
-import { authorize } from "../middleware";
+import { authorize, valdiateReq } from "../middleware";
 import { createInteractions, getInteraction } from "./service";
 import { interactionRequestSchema } from "./type";
 import { getUserById } from "../user/service";
@@ -11,16 +11,22 @@ export function getInteractionRoute(notificationEvent: NotificationEvent) {
 
   interactionsRoute.use(authorize);
 
+  /**
+   * @swagger
+   * /api/interactions:
+   *   post:
+   *     description: Interact with a user
+   *     tags: [Interactions]
+   *     responses:
+   *       200:
+   *         description: OK
+   */
   interactionsRoute.post(
     "/",
+    valdiateReq(interactionRequestSchema),
     asyncHandler(async (req: Request, res: Response) => {
       const fromUserId = req.user?.sub;
-      const { data, error } = interactionRequestSchema.safeParse(req.body);
-      if (!data || error) {
-        res.status(400).json(error);
-        return;
-      }
-      const { toUserId, liked } = data;
+      const { toUserId, liked } = req.body;
 
       // Check if the user exists
       const toUser = await getUserById(toUserId);

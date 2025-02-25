@@ -1,4 +1,4 @@
-import { interactionsInPrivate } from "../../drizzle/schema";
+import { interactionInPrivate } from "../../drizzle/schema";
 import { db, takeUniqueOrThrow } from "../db";
 import { eq, and } from "drizzle-orm";
 
@@ -8,7 +8,7 @@ export async function createInteractions(
   liked: boolean
 ) {
   return db
-    .insert(interactionsInPrivate)
+    .insert(interactionInPrivate)
     .values({
       fromUserId: from,
       toUserId: to,
@@ -22,11 +22,11 @@ export async function createInteractions(
 export async function getInteraction(from: string, to: string) {
   return db
     .select()
-    .from(interactionsInPrivate)
+    .from(interactionInPrivate)
     .where(
       and(
-        eq(interactionsInPrivate.fromUserId, from),
-        eq(interactionsInPrivate.toUserId, to)
+        eq(interactionInPrivate.fromUserId, from),
+        eq(interactionInPrivate.toUserId, to)
       )
     )
     .then(takeUniqueOrThrow);

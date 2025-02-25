@@ -12,17 +12,19 @@ import {
   boolean,
   text,
   smallint,
-  pgPolicy,
-  bigserial,
   foreignKey,
-  serial,
   date,
   primaryKey,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
-export const _private = pgSchema("private");
 export const auth = pgSchema("auth");
+export const _private = pgSchema("_private");
+export const visibilityInPrivate = _private.enum("visibility", [
+  "private",
+  "connected",
+  "public",
+]);
 export const aalLevelInAuth = auth.enum("aal_level", ["aal1", "aal2", "aal3"]);
 export const codeChallengeMethodInAuth = auth.enum("code_challenge_method", [
   "s256",
@@ -181,113 +183,208 @@ export const usersInAuth = auth.table(
   ]
 );
 
-export const notificationInPrivate = _private.table(
-  "notification",
+export const interestInPrivate = _private.table("interest", {
+  id: uuid().defaultRandom().primaryKey().notNull(),
+  name: varchar({ length: 255 }).notNull(),
+});
+
+export const settingsInPrivate = _private.table(
+  "settings",
   {
-    id: bigserial({ mode: "bigint" }).primaryKey().notNull(),
+    id: uuid().defaultRandom().primaryKey().notNull(),
     userId: uuid("user_id").notNull(),
-    data: jsonb().notNull(),
-    type: varchar({ length: 255 }).notNull(),
-    readAt: timestamp("read_at", { mode: "string" }),
-    createdTime: timestamp("created_time", { mode: "date" }).default(
-      sql`CURRENT_TIMESTAMP`
-    ),
-    updatedTime: timestamp("updated_time", { mode: "date" }).default(
-      sql`CURRENT_TIMESTAMP`
-    ),
+    profileVisibility: visibilityInPrivate("profile_visibility")
+      .default("public")
+      .notNull(),
+    contactInfoVisibility: visibilityInPrivate("contact_info_visibility")
+      .default("connected")
+      .notNull(),
+    notiNewMessage: boolean("noti_new_message").default(true).notNull(),
+    notiNewConnectionRequest: boolean("noti_new_connection_request")
+      .default(true)
+      .notNull(),
+    notiNewConnectionRequestAccept: boolean(
+      "noti_new_connection_request_accept"
+    )
+      .default(true)
+      .notNull(),
+    createdTime: timestamp("created_time", { mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedTime: timestamp("updated_time", { mode: "string" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
-    pgPolicy("Enable users to view their own data only", {
-      as: "permissive",
-      for: "select",
-      to: ["authenticated"],
-      using: sql`(( SELECT auth.uid() AS uid) = user_id)`,
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [usersInAuth.id],
+      name: "settings_user_id_fkey",
     }),
+    unique("settings_user_id_key").on(table.userId),
   ]
 );
 
 export const profileInPrivate = _private.table(
   "profile",
   {
-    id: serial().primaryKey().notNull(),
+    id: uuid().defaultRandom().primaryKey().notNull(),
     userId: uuid("user_id").notNull(),
-    name: varchar({ length: 255 }),
-    bio: varchar({ length: 512 }),
+    displayName: varchar("display_name", { length: 255 }),
+    bio: varchar({ length: 255 }),
     birthdate: date(),
-    faculty: varchar({ length: 255 }).notNull(),
-    department: varchar({ length: 255 }).notNull(),
-    year: varchar({ length: 255 }).notNull(),
+    faculty: varchar({ length: 255 }),
+    department: varchar({ length: 255 }),
+    year: varchar({ length: 255 }),
     line: varchar({ length: 255 }),
     facebook: varchar({ length: 255 }),
     instagram: varchar({ length: 255 }),
     other: varchar({ length: 255 }),
+    createdTime: timestamp("created_time", { mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedTime: timestamp("updated_time", { mode: "string" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     foreignKey({
       columns: [table.userId],
       foreignColumns: [usersInAuth.id],
       name: "profile_user_id_fkey",
-    }).onDelete("cascade"),
-    unique("profile_uniq_1").on(table.userId),
+    }),
+    check(
+      "profile_year_check",
+      sql`(year)::text = ANY ((ARRAY['1'::character varying, '2'::character varying, '3'::character varying, '4'::character varying, '>4'::character varying])::text[])`
+    ),
   ]
 );
 
-export const interestInPrivate = _private.table("interest", {
-  id: serial().primaryKey().notNull(),
-  name: varchar({ length: 255 }),
-});
+export const notificationInPrivate = _private.table(
+  "notification",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    userId: uuid("user_id").notNull(),
+    data: jsonb().notNull(),
+    type: varchar({ length: 255 }).notNull(),
+    readAt: timestamp("read_at", { mode: "string" }),
+    createdTime: timestamp("created_time", { mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedTime: timestamp("updated_time", { mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [usersInAuth.id],
+      name: "notification_user_id_fkey",
+    }),
+  ]
+);
+
+export const roomInPrivate = _private.table(
+  "room",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    user1: uuid("user_1").notNull(),
+    user2: uuid("user_2").notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.user1],
+      foreignColumns: [usersInAuth.id],
+      name: "room_user_1_fkey",
+    }),
+    foreignKey({
+      columns: [table.user2],
+      foreignColumns: [usersInAuth.id],
+      name: "room_user_2_fkey",
+    }),
+  ]
+);
+
+export const chatInPrivate = _private.table(
+  "chat",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    roomId: uuid("room_id").notNull(),
+    authorId: uuid("author_id").notNull(),
+    message: varchar({ length: 255 }).notNull(),
+    readAt: timestamp("read_at", { mode: "string" }),
+    createdTime: timestamp("created_time", { mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedTime: timestamp("updated_time", { mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.authorId],
+      foreignColumns: [usersInAuth.id],
+      name: "chat_author_id_fkey",
+    }),
+    foreignKey({
+      columns: [table.roomId],
+      foreignColumns: [roomInPrivate.id],
+      name: "chat_room_id_fkey",
+    }),
+  ]
+);
 
 export const userInterestInPrivate = _private.table(
   "user_interest",
   {
+    interestId: uuid("interest_id").notNull(),
     userId: uuid("user_id").notNull(),
-    interestId: serial("interest_id").notNull(),
   },
   (table) => [
     foreignKey({
       columns: [table.interestId],
       foreignColumns: [interestInPrivate.id],
       name: "user_interest_interest_id_fkey",
-    }).onDelete("cascade"),
+    }),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [usersInAuth.id],
       name: "user_interest_user_id_fkey",
-    }).onDelete("cascade"),
+    }),
     primaryKey({
-      columns: [table.userId, table.interestId],
+      columns: [table.interestId, table.userId],
       name: "user_interest_pkey",
     }),
   ]
 );
 
-export const interactionsInPrivate = _private.table(
-  "interactions",
+export const interactionInPrivate = _private.table(
+  "interaction",
   {
     fromUserId: uuid("from_user_id").notNull(),
     toUserId: uuid("to_user_id").notNull(),
-    liked: boolean(),
-    createdTime: timestamp("created_time", { mode: "string" }).default(
-      sql`CURRENT_TIMESTAMP`
-    ),
-    updatedTime: timestamp("updated_time", { mode: "string" }).default(
-      sql`CURRENT_TIMESTAMP`
-    ),
+    liked: boolean().notNull(),
+    createdTime: timestamp("created_time", { mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedTime: timestamp("updated_time", { mode: "string" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     foreignKey({
       columns: [table.fromUserId],
       foreignColumns: [usersInAuth.id],
-      name: "interactions_from_user_id_fkey",
+      name: "interaction_from_user_id_fkey",
     }),
     foreignKey({
       columns: [table.toUserId],
       foreignColumns: [usersInAuth.id],
-      name: "interactions_to_user_id_fkey",
+      name: "interaction_to_user_id_fkey",
     }),
     primaryKey({
       columns: [table.fromUserId, table.toUserId],
-      name: "interactions_pkey",
+      name: "interaction_pkey",
     }),
   ]
 );

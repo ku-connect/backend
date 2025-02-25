@@ -1,17 +1,17 @@
 import { z } from "zod";
 
 export const profileRequestSchema = z.object({
-  faculty: z.string().min(1, "Faculty should not be empty"),
-  department: z.string().min(1, "Department should not be empty"),
-  year: z.string().min(1, "Year should not be empty"),
-  name: z.string().optional(),
-  bio: z.string().optional(),
-  birthday: z.coerce.date().optional(),
-  line: z.string().optional(),
-  facebook: z.string().optional(),
-  instagram: z.string().optional(),
-  other: z.string().optional(),
-  interests: z.array(z.number()).default([]),
+  displayName: z.string().max(255),
+  bio: z.string().max(255).optional(),
+  birthdate: z.coerce.date().optional(),
+  faculty: z.string().max(255),
+  department: z.string().max(255),
+  year: z.string().max(255),
+  line: z.string().max(255).optional(),
+  facebook: z.string().max(255).optional(),
+  instagram: z.string().max(255).optional(),
+  other: z.string().max(255).optional(),
+  interests: z.array(z.string()).optional().default([]),
 });
 
 export type ProfileRequest = z.infer<typeof profileRequestSchema>;

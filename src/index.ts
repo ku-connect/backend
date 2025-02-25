@@ -10,6 +10,9 @@ import { NotificationService } from "./notification/service";
 import { NotificationEvent } from "./notification/event";
 import { getNotificationRoute } from "./notification";
 import { getInteractionRoute } from "./interactions";
+import { settingsRoute } from "./settings";
+import { StatusCodes } from "http-status-codes";
+import { swaggerDocs } from "./swagger";
 
 const app = express();
 const server = http.createServer(app);
@@ -44,8 +47,9 @@ app.use((err, req, res, next) => {
 app.use("/api/profiles", profileRoute);
 app.use("/api/interactions", getInteractionRoute(notificationEvent));
 app.use("/api/notifications", getNotificationRoute(notiService));
+app.use("/api/settings", settingsRoute);
 
-app.get("/healthz", (_, res) => res.sendStatus(200));
+app.get("/healthz", (_, res) => res.sendStatus(StatusCodes.OK));
 
 // Route for test purpose
 app.post("/test/noti", async (req, res) => {
@@ -57,12 +61,14 @@ app.post("/test/noti", async (req, res) => {
   );
 
   console.log("Finish");
-  res.sendStatus(200);
+  res.sendStatus(StatusCodes.OK);
 });
 
 io.on("connection", (socket) => {
   console.log("Client connected");
 });
+
+swaggerDocs(app, PORT);
 
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

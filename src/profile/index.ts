@@ -1,76 +1,272 @@
 import express, { type Request, type Response } from "express";
-import { authorize } from "../middleware";
+import { authorize, valdiateReq } from "../middleware";
 import {
   createProfile,
   getProfileByUserId,
   getProfiles,
   getProfileWithInterestsByUserId,
+  getUserInterests,
   updateProfile,
+  updateUserInterest,
 } from "./service";
 import { profileRequestSchema } from "./type";
+import { asyncHandler } from "../utils";
 
 export const profileRoute = express.Router();
 
 profileRoute.use(authorize);
 
-profileRoute.get("/", async (req: Request, res: Response) => {
-  const { page = 1, size = 10 } = req.query;
+/**
+ * @swagger
+ * /api/profiles:
+ *   get:
+ *     description: List profile
+ *     tags: [Profile]
+ *     responses:
+ *       200:
+ *         description: Returns a list of profiles
+ *       401:
+ *         description: Unauthorized
+ */
+profileRoute.get(
+  "/",
+  asyncHandler(async (req: Request, res: Response) => {
+    const { page = 1, size = 10 } = req.query;
 
-  const _page = parseInt(page.toString());
-  const _size = parseInt(size.toString());
+    const _page = parseInt(page.toString());
+    const _size = parseInt(size.toString());
 
-  const profiles = await getProfiles(_page, _size);
+    // TODO: Recommendation via Vector Similarity
+    const profiles = await getProfiles(_page, _size);
 
-  // TODO: Recommendation
+    res.json(profiles);
+  })
+);
 
-  res.json(profiles);
-});
+/**
+ * @swagger
+ * /api/profiles/me:
+ *   get:
+ *     description: Get my profile
+ *     tags: [Profile]
+ *     responses:
+ *       200:
+ *         description: Returns a profile
+ *       401:
+ *         description: Unauthorized
+ */
+profileRoute.get(
+  "/me",
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.sub;
 
-// Get my profile
-profileRoute.get("/me", async (req: Request, res: Response) => {
-  const userId = req.user?.sub;
+    const profileWithInterests = await getProfileWithInterestsByUserId(userId);
 
-  const profileWithInterests = await getProfileWithInterestsByUserId(userId);
+    res.json(profileWithInterests);
+  })
+);
 
-  res.json(profileWithInterests);
-});
+/**
+ * @swagger
+ * /api/profiles:
+ *   post:
+ *     description: Create a profile
+ *     tags: [Profile]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               faculty:
+ *                 type: string
+ *                 example: "Science"
+ *               department:
+ *                 type: string
+ *                 example: "Computer Science"
+ *               year:
+ *                 type: string
+ *                 example: "4"
+ *               displayName:
+ *                 type: string
+ *                 example: "Non Weerawong"
+ *               bio:
+ *                 type: string
+ *                 example: "Passionate about software development and machine learning."
+ *               birthdate:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2000-01-01T00:00:00Z"
+ *               line:
+ *                 type: string
+ *                 example: "@nonzagreanthai"
+ *               facebook:
+ *                 type: string
+ *                 format: uri
+ *                 example: "https://facebook.com/non.weerawong"
+ *               instagram:
+ *                 type: string
+ *                 format: uri
+ *                 example: "https://instagram.com/nonzagreanthai"
+ *               other:
+ *                 type: string
+ *                 example: ""
+ *               interests:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: []
+ *     responses:
+ *       200:
+ *         description: Id of the created profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   format: uuid
+ *                   example: "077d63cd-b87c-4ded-8c28-11206d0b6ea1"
+ *       401:
+ *         description: Unauthorized
+ */
+profileRoute.post(
+  "/",
+  valdiateReq(profileRequestSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    const profile = req.body;
+    const userId = req.user.sub;
 
-profileRoute.post("/", async (req: Request, res: Response) => {
-  const profile = req.body;
+    // Check if profile already created
+    const existedProfile = await getProfileByUserId(userId);
+    if (existedProfile) {
+      res.status(400).json({
+        message: "Profile already created",
+      });
+      return;
+    }
 
-  const { data, error } = profileRequestSchema.safeParse(profile);
-  if (!data || error) {
-    res.status(400).json(error);
-    return;
-  }
+    const insertedId = await createProfile(profile, userId);
 
-  const userId = req.user.sub;
+    res.json({ id: insertedId });
+  })
+);
 
-  // Check if profile already created
-  const existedProfile = await getProfileByUserId(userId);
-  if (existedProfile) {
-    res.status(400).json({
-      message: "Profile already created",
-    });
-    return;
-  }
+/**
+ * @swagger
+ * /api/profiles:
+ *   put:
+ *     description: Update a profile replace all fields
+ *     tags: [Profile]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               faculty:
+ *                 type: string
+ *                 example: "Science"
+ *               department:
+ *                 type: string
+ *                 example: "Computer Science"
+ *               year:
+ *                 type: string
+ *                 example: "4"
+ *               displayName:
+ *                 type: string
+ *                 example: "Non Weerawong"
+ *               bio:
+ *                 type: string
+ *                 example: "Passionate about software development and machine learning."
+ *               birthdate:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2000-01-01T00:00:00Z"
+ *               line:
+ *                 type: string
+ *                 example: "@nonzagreanthai"
+ *               facebook:
+ *                 type: string
+ *                 format: uri
+ *                 example: "https://facebook.com/non.weerawong"
+ *               instagram:
+ *                 type: string
+ *                 format: uri
+ *                 example: "https://instagram.com/nonzagreanthai"
+ *               other:
+ *                 type: string
+ *                 example: ""
+ *               interests:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: []
+ *     responses:
+ *       200:
+ *         description: OK
+ *       401:
+ *         description: Unauthorized
+ */
+profileRoute.put(
+  "/",
+  valdiateReq(profileRequestSchema),
+  asyncHandler(async (req: Request, res: Response) => {
+    const profile = req.body;
+    const userId = req.user.sub;
 
-  await createProfile(data, userId);
+    await updateProfile(profile, userId);
 
-  res.sendStatus(200);
-});
+    res.sendStatus(200);
+  })
+);
 
-profileRoute.put("/", async (req: Request, res: Response) => {
-  const profile = req.body;
+/**
+ * @swagger
+ * /api/profiles/interests:
+ *   get:
+ *     description: Get user interests
+ *     tags: [Profile]
+ *     responses:
+ *       200:
+ *         description: OK
+ *       401:
+ *         description: Unauthorized
+ */
+profileRoute.get(
+  "/interests",
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.sub;
 
-  const { data, error } = profileRequestSchema.safeParse(profile);
-  if (!data || error) {
-    res.status(400).json(error);
-    return;
-  }
-  const userId = req.user.sub;
+    const result = await getUserInterests(userId);
 
-  await updateProfile(data, userId);
+    res.json({ interests: result });
+  })
+);
 
-  res.sendStatus(200);
-});
+/**
+ * @swagger
+ * /api/profiles/interests:
+ *   put:
+ *     description: Update user interests replace old interests with new interests
+ *     tags: [Profile]
+ *     responses:
+ *       200:
+ *         description: OK
+ *       401:
+ *         description: Unauthorized
+ */
+profileRoute.put(
+  "/interests",
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.sub;
+    const { interests } = req.body;
+
+    await updateUserInterest(userId, interests);
+
+    res.sendStatus(200);
+  })
+);

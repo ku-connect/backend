@@ -1,5 +1,32 @@
 import { relations } from "drizzle-orm/relations";
-import { usersInAuth, profileInPrivate, interestInPrivate, userInterestInPrivate, interactionsInPrivate } from "./schema";
+import { usersInAuth, settingsInPrivate, profileInPrivate, notificationInPrivate, roomInPrivate, chatInPrivate, interestInPrivate, userInterestInPrivate, interactionInPrivate } from "./schema";
+
+export const settingsInPrivateRelations = relations(settingsInPrivate, ({one}) => ({
+	usersInAuth: one(usersInAuth, {
+		fields: [settingsInPrivate.userId],
+		references: [usersInAuth.id]
+	}),
+}));
+
+export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
+	settingsInPrivates: many(settingsInPrivate),
+	profileInPrivates: many(profileInPrivate),
+	notificationInPrivates: many(notificationInPrivate),
+	roomInPrivates_user1: many(roomInPrivate, {
+		relationName: "roomInPrivate_user1_usersInAuth_id"
+	}),
+	roomInPrivates_user2: many(roomInPrivate, {
+		relationName: "roomInPrivate_user2_usersInAuth_id"
+	}),
+	chatInPrivates: many(chatInPrivate),
+	userInterestInPrivates: many(userInterestInPrivate),
+	interactionInPrivates_fromUserId: many(interactionInPrivate, {
+		relationName: "interactionInPrivate_fromUserId_usersInAuth_id"
+	}),
+	interactionInPrivates_toUserId: many(interactionInPrivate, {
+		relationName: "interactionInPrivate_toUserId_usersInAuth_id"
+	}),
+}));
 
 export const profileInPrivateRelations = relations(profileInPrivate, ({one}) => ({
 	usersInAuth: one(usersInAuth, {
@@ -8,14 +35,35 @@ export const profileInPrivateRelations = relations(profileInPrivate, ({one}) => 
 	}),
 }));
 
-export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
-	profileInPrivates: many(profileInPrivate),
-	userInterestInPrivates: many(userInterestInPrivate),
-	interactionsInPrivates_fromUserId: many(interactionsInPrivate, {
-		relationName: "interactionsInPrivate_fromUserId_usersInAuth_id"
+export const notificationInPrivateRelations = relations(notificationInPrivate, ({one}) => ({
+	usersInAuth: one(usersInAuth, {
+		fields: [notificationInPrivate.userId],
+		references: [usersInAuth.id]
 	}),
-	interactionsInPrivates_toUserId: many(interactionsInPrivate, {
-		relationName: "interactionsInPrivate_toUserId_usersInAuth_id"
+}));
+
+export const roomInPrivateRelations = relations(roomInPrivate, ({one, many}) => ({
+	usersInAuth_user1: one(usersInAuth, {
+		fields: [roomInPrivate.user1],
+		references: [usersInAuth.id],
+		relationName: "roomInPrivate_user1_usersInAuth_id"
+	}),
+	usersInAuth_user2: one(usersInAuth, {
+		fields: [roomInPrivate.user2],
+		references: [usersInAuth.id],
+		relationName: "roomInPrivate_user2_usersInAuth_id"
+	}),
+	chatInPrivates: many(chatInPrivate),
+}));
+
+export const chatInPrivateRelations = relations(chatInPrivate, ({one}) => ({
+	usersInAuth: one(usersInAuth, {
+		fields: [chatInPrivate.authorId],
+		references: [usersInAuth.id]
+	}),
+	roomInPrivate: one(roomInPrivate, {
+		fields: [chatInPrivate.roomId],
+		references: [roomInPrivate.id]
 	}),
 }));
 
@@ -34,15 +82,15 @@ export const interestInPrivateRelations = relations(interestInPrivate, ({many}) 
 	userInterestInPrivates: many(userInterestInPrivate),
 }));
 
-export const interactionsInPrivateRelations = relations(interactionsInPrivate, ({one}) => ({
+export const interactionInPrivateRelations = relations(interactionInPrivate, ({one}) => ({
 	usersInAuth_fromUserId: one(usersInAuth, {
-		fields: [interactionsInPrivate.fromUserId],
+		fields: [interactionInPrivate.fromUserId],
 		references: [usersInAuth.id],
-		relationName: "interactionsInPrivate_fromUserId_usersInAuth_id"
+		relationName: "interactionInPrivate_fromUserId_usersInAuth_id"
 	}),
 	usersInAuth_toUserId: one(usersInAuth, {
-		fields: [interactionsInPrivate.toUserId],
+		fields: [interactionInPrivate.toUserId],
 		references: [usersInAuth.id],
-		relationName: "interactionsInPrivate_toUserId_usersInAuth_id"
+		relationName: "interactionInPrivate_toUserId_usersInAuth_id"
 	}),
 }));
