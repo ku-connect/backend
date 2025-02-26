@@ -133,3 +133,7 @@ export async function updateUserInterest(userId: string, interests: string[]) {
     }
   });
 }
+
+export async function getInterests() {
+  return db.select().from(interestInPrivate);
+}

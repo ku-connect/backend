@@ -2,6 +2,7 @@ import express, { type Request, type Response } from "express";
 import { authorize, valdiateReq } from "../middleware";
 import {
   createProfile,
+  getInterests,
   getProfileByUserId,
   getProfiles,
   getProfileWithInterestsByUserId,
@@ -13,6 +14,7 @@ import { profileRequestSchema } from "./type";
 import { asyncHandler } from "../utils";
 
 export const profileRoute = express.Router();
+export const interestRoute = express.Router();
 
 profileRoute.use(authorize);
 
@@ -226,7 +228,7 @@ profileRoute.put(
 
 /**
  * @swagger
- * /api/profiles/interests:
+ * /api/profiles/me/interests:
  *   get:
  *     description: Get user interests
  *     tags: [Profile]
@@ -237,7 +239,7 @@ profileRoute.put(
  *         description: Unauthorized
  */
 profileRoute.get(
-  "/interests",
+  "/me/interests",
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?.sub;
 
@@ -249,7 +251,7 @@ profileRoute.get(
 
 /**
  * @swagger
- * /api/profiles/interests:
+ * /api/profiles/me/interests:
  *   put:
  *     description: Update user interests replace old interests with new interests
  *     tags: [Profile]
@@ -260,7 +262,7 @@ profileRoute.get(
  *         description: Unauthorized
  */
 profileRoute.put(
-  "/interests",
+  "/me/interests",
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?.sub;
     const { interests } = req.body;
@@ -268,5 +270,25 @@ profileRoute.put(
     await updateUserInterest(userId, interests);
 
     res.sendStatus(200);
+  })
+);
+
+/**
+ * @swagger
+ * /api/interests:
+ *   get:
+ *     description: Get user interests
+ *     tags: [Profile]
+ *     responses:
+ *       200:
+ *         description: OK
+ *       401:
+ *         description: Unauthorized
+ */
+interestRoute.get(
+  "/",
+  asyncHandler(async (req: Request, res: Response) => {
+    const result = await getInterests();
+    res.json(result);
   })
 );
