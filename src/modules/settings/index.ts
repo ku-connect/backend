@@ -1,8 +1,8 @@
 import express, { type Request, type Response } from "express";
-import { authorize, valdiateReq } from "../middleware";
+import { authorize, valdiateReq } from "../../middleware";
 import { getUserSettings, updateUserSettings } from "./service";
 import { settingsRequestSchema } from "./type";
-import { asyncHandler } from "../utils";
+import { asyncHandler } from "../../utils/utils";
 
 export const settingsRoute = express.Router();
 

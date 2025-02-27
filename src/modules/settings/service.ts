@@ -1,5 +1,5 @@
-import { db, takeUniqueOrThrow } from "../db";
-import { settingsInPrivate } from "../../drizzle/schema";
+import { db, takeUniqueOrThrow } from "../../db";
+import { settingsInPrivate } from "../../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { type SettingsRequest } from "./type";
 

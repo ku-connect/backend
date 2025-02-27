@@ -1,5 +1,5 @@
 import express, { type Request, type Response } from "express";
-import { authorize, valdiateReq } from "../middleware";
+import { authorize, valdiateReq } from "../../middleware";
 import {
   createProfile,
   getInterests,
@@ -11,7 +11,7 @@ import {
   updateUserInterest,
 } from "./service";
 import { profileRequestSchema } from "./type";
-import { asyncHandler } from "../utils";
+import { asyncHandler } from "../../utils/utils";
 
 export const profileRoute = express.Router();
 export const interestRoute = express.Router();
@@ -34,12 +34,12 @@ profileRoute.get(
   "/",
   asyncHandler(async (req: Request, res: Response) => {
     const { page = 1, size = 10 } = req.query;
+    const userId = req.user?.sub;
 
     const _page = parseInt(page.toString());
     const _size = parseInt(size.toString());
 
-    // TODO: Recommendation via Vector Similarity
-    const profiles = await getProfiles(_page, _size);
+    const profiles = await getProfiles(_page, _size, userId);
 
     res.json(profiles);
   })

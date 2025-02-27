@@ -1,5 +1,5 @@
-import { interactionInPrivate } from "../../drizzle/schema";
-import { db, takeUniqueOrThrow } from "../db";
+import { interactionInPrivate } from "../../../drizzle/schema";
+import { db, takeUniqueOrThrow } from "../../db";
 import { eq, and } from "drizzle-orm";
 
 export async function createInteractions(

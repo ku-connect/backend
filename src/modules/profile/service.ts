@@ -1,16 +1,76 @@
 import {
   interestInPrivate,
   profileInPrivate,
+  settingsInPrivate,
   userInterestInPrivate,
-} from "../../drizzle/schema";
-import { db, takeUniqueOrThrow } from "../db";
-import { eq } from "drizzle-orm";
+} from "../../../drizzle/schema";
+import { db, takeUniqueOrThrow } from "../../db";
+import {
+  cosineDistance,
+  desc,
+  eq,
+  getTableColumns,
+  inArray,
+  sql,
+  ne,
+} from "drizzle-orm";
 import type { ProfileRequest } from "./type";
 import { createDefaultUserSettings } from "../settings/service";
+import { generateEmbeddings } from "../../utils/embeddings";
+import { omit } from "lodash";
 
-export async function getProfiles(page: number, size: number) {
+export async function getProfiles(page: number, size: number, userId: string) {
+  const profile = await getProfileByUserId(userId);
+
+  const similarity = sql<number>`1 - (${cosineDistance(
+    profileInPrivate.embedding,
+    profile.embedding!
+  )})`;
   const offset = (page - 1) * size;
-  return db.select().from(profileInPrivate).limit(size).offset(offset);
+
+  const { embedding, ...profileColumns } = getTableColumns(profileInPrivate);
+  const profiles = await db
+    .select({
+      ...profileColumns,
+      settings: settingsInPrivate,
+      similarity,
+    })
+    .from(profileInPrivate)
+    .where(ne(profileInPrivate.userId, userId))
+    .orderBy((t) => desc(t.similarity))
+    .leftJoin(
+      settingsInPrivate,
+      eq(profileInPrivate.userId, settingsInPrivate.userId)
+    )
+    .limit(size)
+    .offset(offset);
+
+  const interests = await db
+    .select({
+      id: interestInPrivate.id,
+      userId: userInterestInPrivate.userId,
+      name: interestInPrivate.name,
+    })
+    .from(userInterestInPrivate)
+    .where(
+      inArray(
+        userInterestInPrivate.userId,
+        profiles.map((t) => t.userId)
+      )
+    )
+    .innerJoin(
+      interestInPrivate,
+      eq(userInterestInPrivate.interestId, interestInPrivate.id)
+    );
+
+  return {
+    profiles: profiles.map((profile) => ({
+      ...profile,
+      interests: interests
+        .filter((interest) => interest.userId === profile.userId)
+        .map((interest) => omit(interest, ["userId"])),
+    })),
+  };
 }
 
 export async function getProfileByUserId(userId: string) {
@@ -48,6 +108,11 @@ export async function createProfile(profile: ProfileRequest, userId: string) {
   let insertedId: string | undefined;
 
   await db.transaction(async (tx) => {
+    const existingInterests = await getInterestsByIds(interests);
+    const embeddings = await generateEmbeddings(
+      generatePrompt(existingInterests.map((interest) => interest.name))
+    );
+
     const insertedIds = await tx
       .insert(profileInPrivate)
       .values({
@@ -61,6 +126,7 @@ export async function createProfile(profile: ProfileRequest, userId: string) {
         facebook: profile.facebook,
         instagram: profile.instagram,
         other: profile.other,
+        embedding: embeddings,
         userId,
       })
       .returning({ insertedId: profileInPrivate.id });
@@ -80,6 +146,10 @@ export async function createProfile(profile: ProfileRequest, userId: string) {
   });
 
   return insertedId;
+}
+
+function generatePrompt(interests: string[]) {
+  return `I interested in ${interests.join(", ")}`;
 }
 
 export async function updateProfile(profile: ProfileRequest, userId: string) {
@@ -136,4 +206,11 @@ export async function updateUserInterest(userId: string, interests: string[]) {
 
 export async function getInterests() {
   return db.select().from(interestInPrivate);
+}
+
+async function getInterestsByIds(interestIds: string[]) {
+  return db
+    .select()
+    .from(interestInPrivate)
+    .where(inArray(interestInPrivate.id, interestIds));
 }

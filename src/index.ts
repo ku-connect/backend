@@ -5,12 +5,12 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 
-import { interestRoute, profileRoute } from "./profile";
-import { NotificationService } from "./notification/service";
-import { NotificationEvent } from "./notification/event";
-import { getNotificationRoute } from "./notification";
-import { getInteractionRoute } from "./interactions";
-import { settingsRoute } from "./settings";
+import { interestRoute, profileRoute } from "./modules/profile";
+import { NotificationService } from "./modules/notification/service";
+import { NotificationEvent } from "./modules/notification/event";
+import { getNotificationRoute } from "./modules/notification";
+import { getInteractionRoute } from "./modules/interactions";
+import { settingsRoute } from "./modules/settings";
 import { StatusCodes } from "http-status-codes";
 import { swaggerDocs } from "./swagger";
 

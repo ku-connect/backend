@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { usersInAuth, settingsInPrivate, profileInPrivate, notificationInPrivate, roomInPrivate, chatInPrivate, interestInPrivate, userInterestInPrivate, interactionInPrivate } from "./schema";
+import { usersInAuth, settingsInPrivate, notificationInPrivate, roomInPrivate, chatInPrivate, interestInPrivate, userInterestInPrivate, interactionInPrivate } from "./schema";
 
 export const settingsInPrivateRelations = relations(settingsInPrivate, ({one}) => ({
 	usersInAuth: one(usersInAuth, {
@@ -10,7 +10,6 @@ export const settingsInPrivateRelations = relations(settingsInPrivate, ({one}) =
 
 export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
 	settingsInPrivates: many(settingsInPrivate),
-	profileInPrivates: many(profileInPrivate),
 	notificationInPrivates: many(notificationInPrivate),
 	roomInPrivates_user1: many(roomInPrivate, {
 		relationName: "roomInPrivate_user1_usersInAuth_id"
@@ -25,13 +24,6 @@ export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
 	}),
 	interactionInPrivates_toUserId: many(interactionInPrivate, {
 		relationName: "interactionInPrivate_toUserId_usersInAuth_id"
-	}),
-}));
-
-export const profileInPrivateRelations = relations(profileInPrivate, ({one}) => ({
-	usersInAuth: one(usersInAuth, {
-		fields: [profileInPrivate.userId],
-		references: [usersInAuth.id]
 	}),
 }));
 

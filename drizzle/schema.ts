@@ -1,19 +1,20 @@
 import {
   pgTable,
   pgSchema,
-  uniqueIndex,
-  index,
-  unique,
   check,
   uuid,
   varchar,
+  date,
+  vector,
   timestamp,
+  uniqueIndex,
+  index,
+  unique,
   jsonb,
   boolean,
   text,
   smallint,
   foreignKey,
-  date,
   primaryKey,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -56,6 +57,37 @@ export const refreshTokensIdSeqInAuth = auth.sequence("refresh_tokens_id_seq", {
   cache: "1",
   cycle: false,
 });
+
+export const profileInPrivate = _private.table(
+  "profile",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    userId: uuid("user_id").notNull(),
+    displayName: varchar("display_name", { length: 255 }),
+    bio: varchar({ length: 255 }),
+    birthdate: date(),
+    faculty: varchar({ length: 255 }),
+    department: varchar({ length: 255 }),
+    year: varchar({ length: 255 }),
+    line: varchar({ length: 255 }),
+    facebook: varchar({ length: 255 }),
+    instagram: varchar({ length: 255 }),
+    other: varchar({ length: 255 }),
+    embedding: vector({ dimensions: 768 }),
+    createdTime: timestamp("created_time", { mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedTime: timestamp("updated_time", { mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    check(
+      "profile_year_check",
+      sql`(year)::text = ANY ((ARRAY['1'::character varying, '2'::character varying, '3'::character varying, '4'::character varying, '>4'::character varying])::text[])`
+    ),
+  ]
+);
 
 export const usersInAuth = auth.table(
   "users",
@@ -222,41 +254,6 @@ export const settingsInPrivate = _private.table(
       name: "settings_user_id_fkey",
     }),
     unique("settings_user_id_key").on(table.userId),
-  ]
-);
-
-export const profileInPrivate = _private.table(
-  "profile",
-  {
-    id: uuid().defaultRandom().primaryKey().notNull(),
-    userId: uuid("user_id").notNull(),
-    displayName: varchar("display_name", { length: 255 }),
-    bio: varchar({ length: 255 }),
-    birthdate: date(),
-    faculty: varchar({ length: 255 }),
-    department: varchar({ length: 255 }),
-    year: varchar({ length: 255 }),
-    line: varchar({ length: 255 }),
-    facebook: varchar({ length: 255 }),
-    instagram: varchar({ length: 255 }),
-    other: varchar({ length: 255 }),
-    createdTime: timestamp("created_time", { mode: "string" })
-      .defaultNow()
-      .notNull(),
-    updatedTime: timestamp("updated_time", { mode: "string" })
-      .defaultNow()
-      .notNull(),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.userId],
-      foreignColumns: [usersInAuth.id],
-      name: "profile_user_id_fkey",
-    }),
-    check(
-      "profile_year_check",
-      sql`(year)::text = ANY ((ARRAY['1'::character varying, '2'::character varying, '3'::character varying, '4'::character varying, '>4'::character varying])::text[])`
-    ),
   ]
 );
 

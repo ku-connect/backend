@@ -1,9 +1,9 @@
 import express, { type Request, type Response } from "express";
-import { authorize, valdiateReq } from "../middleware";
+import { authorize, valdiateReq } from "../../middleware";
 import { createInteractions, getInteraction } from "./service";
 import { interactionRequestSchema } from "./type";
 import { getUserById } from "../user/service";
-import { asyncHandler } from "../utils";
+import { asyncHandler } from "../../utils/utils";
 import type { NotificationEvent } from "../notification/event";
 
 export function getInteractionRoute(notificationEvent: NotificationEvent) {

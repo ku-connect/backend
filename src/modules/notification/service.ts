@@ -1,6 +1,6 @@
 import type { Server } from "socket.io";
-import { db } from "../db";
-import { notificationInPrivate } from "../../drizzle/schema";
+import { db } from "../../db";
+import { notificationInPrivate } from "../../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 
 export class NotificationService {

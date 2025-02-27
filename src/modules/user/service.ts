@@ -1,5 +1,5 @@
-import { usersInAuth } from "../../drizzle/schema";
-import { db, takeUniqueOrThrow } from "../db";
+import { usersInAuth } from "../../../drizzle/schema";
+import { db, takeUniqueOrThrow } from "../../db";
 import { eq } from "drizzle-orm";
 
 export async function getUserById(userId: string) {

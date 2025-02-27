@@ -1,7 +1,7 @@
 import express, { type Request, type Response } from "express";
-import { authorize } from "../middleware";
+import { authorize } from "../../middleware";
 import { NotificationService } from "./service";
-import { asyncHandler } from "../utils";
+import { asyncHandler } from "../../utils/utils";
 
 export function getNotificationRoute(notificationService: NotificationService) {
   const notificationRoute = express.Router();
