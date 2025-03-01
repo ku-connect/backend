@@ -13,12 +13,13 @@ import { getInteractionRoute } from "./modules/interactions";
 import { settingsRoute } from "./modules/settings";
 import { StatusCodes } from "http-status-codes";
 import { swaggerDocs } from "./swagger";
+import { config } from "./config";
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: config.FRONTEND_URL,
     methods: ["GET", "POST"],
   },
 });
@@ -27,7 +28,7 @@ const io = new Server(server, {
 const notiService = new NotificationService(io);
 const notificationEvent = new NotificationEvent(notiService);
 
-const PORT = process.env.PORT || "4000";
+const PORT = config.PORT;
 
 // Middleware to parse JSON data
 app.use(express.json());

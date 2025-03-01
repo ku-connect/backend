@@ -2,6 +2,7 @@ import { profileInPrivate, userInterestInPrivate } from "../drizzle/schema";
 import { db } from "./db";
 import { generateEmbeddings } from "./utils/embeddings";
 
+// WIP
 async function seed() {
   const mockUserIds = [
     "160004d1-3f39-4ba4-8a41-db70eb0c3142",

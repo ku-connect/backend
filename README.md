@@ -1,4 +1,4 @@
-# backend
+# KU Connect API
 
 To install dependencies:
 
