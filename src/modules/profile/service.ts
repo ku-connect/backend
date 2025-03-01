@@ -189,10 +189,12 @@ export async function getUserInterests(userId: string) {
 
 export async function updateUserInterest(userId: string, interests: string[]) {
   await db.transaction(async (tx) => {
+    // clean up user interests
     await tx
       .delete(userInterestInPrivate)
       .where(eq(userInterestInPrivate.userId, userId));
 
+    // update user interests (if < 0 mean user remove all their interests)
     if (interests.length > 0) {
       await tx.insert(userInterestInPrivate).values(
         interests.map((interestId) => ({
@@ -200,6 +202,18 @@ export async function updateUserInterest(userId: string, interests: string[]) {
           interestId,
         }))
       );
+
+      const existingInterests = await getInterestsByIds(interests);
+      const embeddings = await generateEmbeddings(
+        generatePrompt(existingInterests.map((interest) => interest.name))
+      );
+
+      await tx
+        .update(profileInPrivate)
+        .set({
+          embedding: embeddings,
+        })
+        .where(eq(profileInPrivate.userId, userId));
     }
   });
 }
