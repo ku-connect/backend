@@ -6,17 +6,23 @@ import {
   updateSettings,
 } from "./repository";
 
-export async function getUserSettings(userId: string) {
+async function getUserSettings(userId: string) {
   return findSettingsByUserId(db, userId);
 }
 
-export async function createDefaultUserSettings(userId: string) {
+async function createDefaultUserSettings(userId: string) {
   return createSettings(db, userId);
 }
 
-export async function updateUserSettings(
+async function updateUserSettings(
   settingsRequest: SettingsRequest,
   userId: string
 ) {
   return updateSettings(db, userId, settingsRequest);
 }
+
+export default {
+  getUserSettings,
+  createDefaultUserSettings,
+  updateUserSettings,
+};

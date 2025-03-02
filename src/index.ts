@@ -5,15 +5,12 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 
-import { interestRoute, meRoute, profileRoute } from "./modules/profile";
 import { NotificationService } from "./modules/notification/service";
 import { NotificationEvent } from "./modules/notification/event";
-import { getNotificationRoute } from "./modules/notification";
-import { getInteractionRoute } from "./modules/interactions";
-import { settingsRoute } from "./modules/settings";
 import { StatusCodes } from "http-status-codes";
 import { swaggerDocs } from "./swagger";
 import { config } from "./config";
+import { registerRoute } from "./routes";
 
 const app = express();
 const server = http.createServer(app);
@@ -44,15 +41,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Define routes
-app.use("/api/profiles", profileRoute);
-app.use("/api/me", meRoute);
-app.use("/api/interests", interestRoute);
-app.use("/api/interactions", getInteractionRoute(notificationEvent));
-app.use("/api/notifications", getNotificationRoute(notiService));
-app.use("/api/settings", settingsRoute);
-
-app.get("/healthz", (_, res) => res.sendStatus(StatusCodes.OK));
+registerRoute(app, io);
 
 // Route for test purpose
 app.post("/test/noti", async (req, res) => {

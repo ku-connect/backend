@@ -1,31 +1,32 @@
 import type { Server } from "socket.io";
 import { db } from "../../db";
-import { notificationInPrivate } from "../../../drizzle/schema";
-import { eq, desc } from "drizzle-orm";
+import notificationRepository from "./repository";
 
 export class NotificationService {
   private io: Server;
   private key = "notification";
 
-  public constructor(io: Server) {
+  constructor(io: Server) {
     this.io = io;
   }
 
-  public getMyNotification(userId: string, page: number, size: number) {
-    const offset = (page - 1) * size;
-    return db
-      .select()
-      .from(notificationInPrivate)
-      .where(eq(notificationInPrivate.userId, userId))
-      .orderBy(desc(notificationInPrivate.createdTime))
-      .limit(size)
-      .offset(offset);
-  }
+  getMyNotification = async (userId: string, page: number, size: number) => {
+    return notificationRepository.findMyNotificationPaginated(
+      db,
+      userId,
+      page,
+      size
+    );
+  };
 
-  public async sendNewInteractionNotification(
+  readNotifications = async (notificationIds: string[]) => {
+    return notificationRepository.readNotifications(db, notificationIds);
+  };
+
+  sendNewInteractionNotification = async (
     fromUserId: string,
     toUserId: string
-  ) {
+  ) => {
     const notification = {
       userId: toUserId,
       type: "INTERACTION",
@@ -34,24 +35,20 @@ export class NotificationService {
         message: "Explore your connections to find out who.",
       },
       readAt: null,
-      createdTime: new Date(),
-      updatedTime: new Date(),
+      createdTime: new Date().toISOString(),
+      updatedTime: new Date().toISOString(),
     };
 
-    const result = await this.saveNotification(notification);
-    console.log(result[0]);
+    console.log("New interaction notification");
+    const result = await notificationRepository.createNotification(
+      db,
+      notification
+    );
 
-    this.sendNotificationToClient({
-      ...result[0],
-      id: result[0].id.toString(),
-    });
-  }
+    this.sendNotificationToClient(result);
+  };
 
-  private saveNotification(data: any) {
-    return db.insert(notificationInPrivate).values(data).returning();
-  }
-
-  private sendNotificationToClient(data: any) {
+  private sendNotificationToClient = async (data: any) => {
     this.io.emit(this.key, data);
-  }
+  };
 }

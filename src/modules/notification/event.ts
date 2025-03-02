@@ -9,7 +9,7 @@ export class NotificationEvent {
   private event = new EventEmitter();
   private notificationService: NotificationService;
 
-  public constructor(notificationService: NotificationService) {
+  constructor(notificationService: NotificationService) {
     this.notificationService = notificationService;
 
     this.event.on(events.INTERACTION, async (fromUserId, toUserId) => {
@@ -20,7 +20,7 @@ export class NotificationEvent {
     });
   }
 
-  public sendNewInteractionEvent(fromUserId: string, toUserId: string) {
+  sendNewInteractionEvent = (fromUserId: string, toUserId: string) => {
     this.event.emit(events.INTERACTION, fromUserId, toUserId);
-  }
+  };
 }

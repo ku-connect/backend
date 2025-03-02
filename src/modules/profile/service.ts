@@ -1,6 +1,6 @@
 import { db } from "../../db";
 import type { ProfileRequest } from "./type";
-import { createDefaultUserSettings } from "../settings/service";
+import settingsService from "../settings/service";
 import { generateEmbeddings } from "../../utils/embeddings";
 import { omit } from "lodash";
 import { isConnected } from "../interactions/service";
@@ -20,7 +20,7 @@ import {
 } from "./repository";
 import { findInteractionsFromUserId } from "../interactions/repository";
 
-export async function getProfiles(page: number, size: number, userId: string) {
+async function getProfiles(page: number, size: number, userId: string) {
   const profile = await findProfile(db, userId);
   const profiles = await findProfilesSimilarityPaginated(
     db,
@@ -60,7 +60,7 @@ function tryOmitContactInfo(profile: any) {
   return profile;
 }
 
-export async function getProfileByUserId(userId: string, me: string) {
+async function getProfileByUserId(userId: string, me: string) {
   let profile = await findProfileWithSettings(db, userId);
 
   if (!profile) {
@@ -81,10 +81,7 @@ export async function getProfileByUserId(userId: string, me: string) {
   return profile;
 }
 
-export async function getProfileWithInterestsByUserId(
-  userId: string,
-  me: string
-) {
+async function getProfileWithInterestsByUserId(userId: string, me: string) {
   const profile = await getProfileByUserId(userId, me);
   if (!profile) {
     return null;
@@ -98,7 +95,7 @@ export async function getProfileWithInterestsByUserId(
   };
 }
 
-export async function createProfile(profile: ProfileRequest, userId: string) {
+async function createProfile(profile: ProfileRequest, userId: string) {
   const interests = profile.interests;
   let insertedId: string | undefined;
 
@@ -121,7 +118,7 @@ export async function createProfile(profile: ProfileRequest, userId: string) {
       await createUserInterests(tx, userId, interests);
     }
 
-    await createDefaultUserSettings(userId);
+    await settingsService.createDefaultUserSettings(userId);
   });
 
   return insertedId;
@@ -131,15 +128,15 @@ function generatePrompt(interests: string[]) {
   return `I interested in ${interests.join(", ")}`;
 }
 
-export async function updateProfile(profile: ProfileRequest, userId: string) {
+async function updateProfile(profile: ProfileRequest, userId: string) {
   return updateProfileRepo(db, profile, userId);
 }
 
-export async function getUserInterests(userId: string) {
+async function getUserInterests(userId: string) {
   return findInterestsByUserId(db, userId);
 }
 
-export async function updateUserInterest(userId: string, interests: string[]) {
+async function updateUserInterest(userId: string, interests: string[]) {
   await db.transaction(async (tx) => {
     // clean up user interests
     await deleteUserInterests(tx, userId);
@@ -159,6 +156,17 @@ export async function updateUserInterest(userId: string, interests: string[]) {
   });
 }
 
-export async function getInterests() {
+async function getInterests() {
   return findInterests(db);
 }
+
+export default {
+  getProfiles,
+  getProfileByUserId,
+  getProfileWithInterestsByUserId,
+  createProfile,
+  updateProfile,
+  getUserInterests,
+  updateUserInterest,
+  getInterests,
+};
