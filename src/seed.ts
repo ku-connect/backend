@@ -1,161 +1,332 @@
-import { profileInPrivate, userInterestInPrivate } from "../drizzle/schema";
+import { faker } from "@faker-js/faker";
+import {
+  interestInPrivate,
+  profileInPrivate,
+  settingsInPrivate,
+  userInterestInPrivate,
+  usersInAuth,
+} from "../drizzle/schema";
 import { db } from "./db";
 import { generateEmbeddings } from "./utils/embeddings";
 
-// WIP
-async function seed() {
-  const mockUserIds = [
-    "160004d1-3f39-4ba4-8a41-db70eb0c3142",
-    "69a13e43-40dc-4529-9622-a5535a76a794",
-    "e60d93c9-cf98-42bc-9278-eb667be41a66",
-    "296a8061-2a64-49df-a6c1-aab4fe84b44c",
-    "86a5da07-b0af-4ecf-91ab-22b99de85de7",
-    "c013059a-4155-41fd-8ae7-77d73d867eed",
-    "7b78c037-175d-4589-8641-092d78de691e",
-    "d903a23d-8257-4651-825a-0f7d96547380",
-    "da1a0b93-2035-4328-8ce3-18f136dc2464",
-    "8e7d34a1-bdc1-4dcc-b651-e0a05b388117",
-  ];
+type User = {
+  id: string;
+  email: string;
+  emailConfirmedAt: string;
+  interests: { name: string }[];
+  profile: {
+    displayName: string;
+  };
+  settings: {
+    profileVisibility: "public" | "private" | "connected";
+    contactInfoVisibility: "public" | "private" | "connected";
+    notiNewMessage: boolean;
+    notiNewConnectionRequest: boolean;
+    notiNewConnectionRequestAccept: boolean;
+  };
+};
 
-  const mockInterests = {
-    "160004d1-3f39-4ba4-8a41-db70eb0c3142": [
+const users: User[] = [
+  {
+    id: "160004d1-3f39-4ba4-8a41-db70eb0c3142",
+    email: faker.internet.email(),
+    emailConfirmedAt: new Date().toISOString(),
+    interests: [
       {
-        id: "8563b06c-81fb-4858-b305-60a8c2881028",
         name: "📚 Study Groups",
       },
       {
-        id: "1f280ec0-2ce4-4ddb-8f6a-07f79efe1cce",
         name: "🎮 Gaming",
       },
     ],
-    "69a13e43-40dc-4529-9622-a5535a76a794": [
+    profile: {
+      displayName: faker.internet.username(),
+    },
+    settings: {
+      profileVisibility: "public",
+      contactInfoVisibility: "public",
+      notiNewMessage: true,
+      notiNewConnectionRequest: true,
+      notiNewConnectionRequestAccept: true,
+    },
+  },
+  {
+    id: "69a13e43-40dc-4529-9622-a5535a76a794",
+    email: faker.internet.email(),
+    emailConfirmedAt: new Date().toISOString(),
+    interests: [
       {
-        id: "1f280ec0-2ce4-4ddb-8f6a-07f79efe1cce",
         name: "🎮 Gaming",
       },
       {
-        id: "319346a1-d2f6-4d84-b6c8-6a856c4f95c0",
         name: "💻 Coding",
       },
       {
-        id: "8d2cb28e-7b4b-4397-94b1-e2b0c75c8745",
         name: "🏆 Competitions",
       },
     ],
-    "e60d93c9-cf98-42bc-9278-eb667be41a66": [
+    profile: {
+      displayName: faker.internet.username(),
+    },
+    settings: {
+      profileVisibility: "public",
+      contactInfoVisibility: "public",
+      notiNewMessage: true,
+      notiNewConnectionRequest: true,
+      notiNewConnectionRequestAccept: true,
+    },
+  },
+  {
+    id: "e60d93c9-cf98-42bc-9278-eb667be41a66",
+    email: faker.internet.email(),
+    emailConfirmedAt: new Date().toISOString(),
+    interests: [
       {
-        id: "1f280ec0-2ce4-4ddb-8f6a-07f79efe1cce",
         name: "🎮 Gaming",
       },
       {
-        id: "8563b06c-81fb-4858-b305-60a8c2881028",
         name: "📚 Study Groups",
       },
       {
-        id: "4a868edb-7314-4801-b8df-1efd60fd7ff6",
         name: "🎶 Music",
       },
     ],
-    "296a8061-2a64-49df-a6c1-aab4fe84b44c": [
+    profile: {
+      displayName: faker.internet.username(),
+    },
+    settings: {
+      profileVisibility: "public",
+      contactInfoVisibility: "public",
+      notiNewMessage: true,
+      notiNewConnectionRequest: true,
+      notiNewConnectionRequestAccept: true,
+    },
+  },
+  {
+    id: "296a8061-2a64-49df-a6c1-aab4fe84b44c",
+    email: faker.internet.email(),
+    emailConfirmedAt: new Date().toISOString(),
+    interests: [
       {
-        id: "da72f82a-f679-47d6-b0c7-33ff3ea1e3bf",
         name: "🌾 Gardening",
       },
       {
-        id: "13f1c955-bcc7-4f3f-8f7e-ddf43cd56c24",
         name: "🍹 Mixology",
       },
       {
-        id: "0ce188cb-baff-4843-931e-c6489feb0225",
         name: "🎤 Singing",
       },
     ],
-    "86a5da07-b0af-4ecf-91ab-22b99de85de7": [
+    profile: {
+      displayName: faker.internet.username(),
+    },
+    settings: {
+      profileVisibility: "public",
+      contactInfoVisibility: "public",
+      notiNewMessage: true,
+      notiNewConnectionRequest: true,
+      notiNewConnectionRequestAccept: true,
+    },
+  },
+  {
+    id: "86a5da07-b0af-4ecf-91ab-22b99de85de7",
+    email: faker.internet.email(),
+    emailConfirmedAt: new Date().toISOString(),
+    interests: [
       {
-        id: "0ce188cb-baff-4843-931e-c6489feb0225",
         name: "🎤 Singing",
       },
       {
-        id: "e24dfc99-e2fb-4edf-b03c-522191782595",
         name: "🎥 Filmmaking",
       },
     ],
-    "c013059a-4155-41fd-8ae7-77d73d867eed": [
+    profile: {
+      displayName: faker.internet.username(),
+    },
+    settings: {
+      profileVisibility: "public",
+      contactInfoVisibility: "public",
+      notiNewMessage: true,
+      notiNewConnectionRequest: true,
+      notiNewConnectionRequestAccept: true,
+    },
+  },
+  {
+    id: "c013059a-4155-41fd-8ae7-77d73d867eed",
+    email: faker.internet.email(),
+    emailConfirmedAt: new Date().toISOString(),
+    interests: [
       {
-        id: "31d2d594-48c4-463a-8495-f1fe84d4d840",
         name: "🧘‍♂️ Meditation",
       },
     ],
-    "7b78c037-175d-4589-8641-092d78de691e": [
+    profile: {
+      displayName: faker.internet.username(),
+    },
+    settings: {
+      profileVisibility: "public",
+      contactInfoVisibility: "public",
+      notiNewMessage: true,
+      notiNewConnectionRequest: true,
+      notiNewConnectionRequestAccept: true,
+    },
+  },
+  {
+    id: "7b78c037-175d-4589-8641-092d78de691e",
+    email: faker.internet.email(),
+    emailConfirmedAt: new Date().toISOString(),
+    interests: [
       {
-        id: "db822200-ae51-448a-9198-24fde4e9e357",
         name: "🐾 Pet Care",
       },
       {
-        id: "31d2d594-48c4-463a-8495-f1fe84d4d840",
         name: "🧘‍♂️ Meditation",
       },
     ],
-    "d903a23d-8257-4651-825a-0f7d96547380": [
+    profile: {
+      displayName: faker.internet.username(),
+    },
+    settings: {
+      profileVisibility: "public",
+      contactInfoVisibility: "public",
+      notiNewMessage: true,
+      notiNewConnectionRequest: true,
+      notiNewConnectionRequestAccept: true,
+    },
+  },
+  {
+    id: "d903a23d-8257-4651-825a-0f7d96547380",
+    email: faker.internet.email(),
+    emailConfirmedAt: new Date().toISOString(),
+    interests: [
       {
-        id: "dc18947b-25bf-40ca-bb3e-7d22fd5ad8fd",
         name: "🤖 Robotics",
       },
       {
-        id: "319346a1-d2f6-4d84-b6c8-6a856c4f95c0",
         name: "💻 Coding",
       },
       {
-        id: "8d2cb28e-7b4b-4397-94b1-e2b0c75c8745",
         name: "🏆 Competitions",
       },
     ],
-    "da1a0b93-2035-4328-8ce3-18f136dc2464": [
+    profile: {
+      displayName: faker.internet.username(),
+    },
+    settings: {
+      profileVisibility: "public",
+      contactInfoVisibility: "public",
+      notiNewMessage: true,
+      notiNewConnectionRequest: true,
+      notiNewConnectionRequestAccept: true,
+    },
+  },
+  {
+    id: "da1a0b93-2035-4328-8ce3-18f136dc2464",
+    email: faker.internet.email(),
+    emailConfirmedAt: new Date().toISOString(),
+    interests: [
       {
-        id: "6c827f6f-d2c4-448f-8fe3-0aab01109342",
         name: "⚽ Sports",
       },
       {
-        id: "8d2cb28e-7b4b-4397-94b1-e2b0c75c8745",
         name: "🏆 Competitions",
       },
     ],
-    "8e7d34a1-bdc1-4dcc-b651-e0a05b388117": [
+    profile: {
+      displayName: faker.internet.username(),
+    },
+    settings: {
+      profileVisibility: "public",
+      contactInfoVisibility: "public",
+      notiNewMessage: true,
+      notiNewConnectionRequest: true,
+      notiNewConnectionRequestAccept: true,
+    },
+  },
+  {
+    id: "8e7d34a1-bdc1-4dcc-b651-e0a05b388117",
+    email: faker.internet.email(),
+    emailConfirmedAt: new Date().toISOString(),
+    interests: [
       {
-        id: "4a0706c2-f98b-4906-bd81-3cbd8cd1cde6",
         name: "💼 Part-time Jobs",
       },
     ],
-  } as any;
+    profile: {
+      displayName: faker.internet.username(),
+    },
+    settings: {
+      profileVisibility: "public",
+      contactInfoVisibility: "public",
+      notiNewMessage: true,
+      notiNewConnectionRequest: true,
+      notiNewConnectionRequestAccept: true,
+    },
+  },
+];
 
-  const profiles = [];
+// WIP
+async function seed() {
+  // generate mock users
+  for (const user of users) {
+    await db
+      .insert(usersInAuth)
+      .values({
+        id: user.id,
+        email: user.email,
+        emailConfirmedAt: user.emailConfirmedAt,
+      })
+      .onConflictDoNothing();
+  }
 
-  for (const userId of mockUserIds) {
-    const interests = mockInterests[userId];
+  // get ku connect interests
+  const interests = await db.select().from(interestInPrivate);
+  const interestMap = interests.reduce((acc: any, interest) => {
+    acc[interest.name] = interest;
+    return acc;
+  }, {});
+
+  // generate profiles
+  const profiles: any = [];
+  for (const user of users) {
+    // const interests = mockInterests[userId];
     const embedding = await generateEmbeddings(
       `I interested in ${interests
         .map((interest: any) => interest.name)
         .join(", ")}`
     );
     profiles.push({
-      userId: userId,
-      displayName: "User " + userId,
+      userId: user.id,
+      displayName: user.profile.displayName,
       embedding: embedding,
     });
   }
 
-  await db.insert(profileInPrivate).values(profiles);
+  await db.transaction(async (tx) => {
+    // save profiles
+    await tx.insert(profileInPrivate).values(profiles);
 
-  await db.insert(userInterestInPrivate).values(
-    mockUserIds.flatMap((userId) =>
-      mockInterests[userId].map((interest: any) => ({
-        userId,
-        interestId: interest.id,
+    // save interests
+    await tx.insert(userInterestInPrivate).values(
+      users.flatMap((user) =>
+        user.interests.map((interest: any) => ({
+          userId: user.id,
+          interestId: interestMap[interest.name].id,
+        }))
+      )
+    );
+
+    // save settings
+    await tx.insert(settingsInPrivate).values(
+      users.map((user) => ({
+        userId: user.id,
+        ...user.settings,
       }))
-    )
-  );
+    );
+  });
 }
 
 seed().then(() => {
   console.log("Seed completed");
+  process.exit(0);
 });

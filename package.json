@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "bun --watch src/index.ts",
-    "start": "bun src/index.ts"
+    "start": "bun src/index.ts",
+    "seed": "bun src/seed.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -19,6 +20,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.5.1",
     "@nomic-ai/atlas": "^0.12.0",
     "@types/express": "4",
     "@types/lodash": "^4.17.15",

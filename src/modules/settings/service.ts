@@ -1,33 +1,22 @@
-import { db, takeUniqueOrThrow } from "../../db";
-import { settingsInPrivate } from "../../../drizzle/schema";
-import { eq } from "drizzle-orm";
+import { db } from "../../db";
 import { type SettingsRequest } from "./type";
+import {
+  createSettings,
+  findSettingsByUserId,
+  updateSettings,
+} from "./repository";
 
 export async function getUserSettings(userId: string) {
-  return db
-    .select()
-    .from(settingsInPrivate)
-    .where(eq(settingsInPrivate.userId, userId))
-    .then(takeUniqueOrThrow);
+  return findSettingsByUserId(db, userId);
 }
 
 export async function createDefaultUserSettings(userId: string) {
-  console.log("Create default user settings", userId);
-  return db.insert(settingsInPrivate).values({
-    userId: userId,
-  });
+  return createSettings(db, userId);
 }
 
 export async function updateUserSettings(
   settingsRequest: SettingsRequest,
   userId: string
 ) {
-  return db
-    .update(settingsInPrivate)
-    .set({
-      ...settingsRequest,
-    })
-    .where(eq(settingsInPrivate.userId, userId))
-    .returning()
-    .then(takeUniqueOrThrow);
+  return updateSettings(db, userId, settingsRequest);
 }

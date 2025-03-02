@@ -8,6 +8,13 @@ const connectionString = config.DATABASE_URL;
 export const client = postgres(connectionString, { prepare: false });
 export const db = drizzle(client);
 
+type DatabaseType = typeof db;
+type TransactionType = Parameters<
+  Parameters<DatabaseType["transaction"]>[0]
+>[0];
+
+export type DB = DatabaseType | TransactionType;
+
 // Define this helper somewhere in your codebase:
 export const takeUniqueOrThrow = <T extends any[]>(values: T): T[number] => {
   if (!values) {

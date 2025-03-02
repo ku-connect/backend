@@ -3,7 +3,6 @@ import { authorize, valdiateReq } from "../../middleware";
 import {
   createProfile,
   getInterests,
-  getProfileByUserId,
   getProfiles,
   getProfileWithInterestsByUserId,
   getUserInterests,
@@ -16,7 +15,11 @@ import { asyncHandler } from "../../utils/utils";
 export const profileRoute = express.Router();
 export const interestRoute = express.Router();
 
+// route for getting current user info
+export const meRoute = express.Router();
+
 profileRoute.use(authorize);
+meRoute.use(authorize);
 
 /**
  * @swagger
@@ -47,7 +50,7 @@ profileRoute.get(
 
 /**
  * @swagger
- * /api/profiles/me:
+ * /api/me/profile:
  *   get:
  *     description: Get my profile
  *     tags: [Profile]
@@ -57,12 +60,43 @@ profileRoute.get(
  *       401:
  *         description: Unauthorized
  */
-profileRoute.get(
-  "/me",
+meRoute.get(
+  "/profile",
   asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user?.sub;
 
-    const profileWithInterests = await getProfileWithInterestsByUserId(userId);
+    console.log(userId);
+    const profileWithInterests = await getProfileWithInterestsByUserId(
+      userId,
+      userId
+    );
+
+    res.json(profileWithInterests);
+  })
+);
+
+/**
+ * @swagger
+ * /api/profiles/:id:
+ *   get:
+ *     description: Get other user profile
+ *     tags: [Profile]
+ *     responses:
+ *       200:
+ *         description: Returns a profile
+ *       401:
+ *         description: Unauthorized
+ */
+profileRoute.get(
+  "/:id",
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user?.sub;
+    const { id } = req.params;
+
+    const profileWithInterests = await getProfileWithInterestsByUserId(
+      id,
+      userId
+    );
 
     res.json(profileWithInterests);
   })
@@ -140,15 +174,6 @@ profileRoute.post(
   asyncHandler(async (req: Request, res: Response) => {
     const profile = req.body;
     const userId = req.user.sub;
-
-    // Check if profile already created
-    const existedProfile = await getProfileByUserId(userId);
-    if (existedProfile) {
-      res.status(400).json({
-        message: "Profile already created",
-      });
-      return;
-    }
 
     const insertedId = await createProfile(profile, userId);
 
@@ -277,7 +302,7 @@ profileRoute.put(
  * @swagger
  * /api/interests:
  *   get:
- *     description: Get user interests
+ *     description: Get KU Connect interests
  *     tags: [Profile]
  *     responses:
  *       200:

@@ -5,7 +5,7 @@ import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 
-import { interestRoute, profileRoute } from "./modules/profile";
+import { interestRoute, meRoute, profileRoute } from "./modules/profile";
 import { NotificationService } from "./modules/notification/service";
 import { NotificationEvent } from "./modules/notification/event";
 import { getNotificationRoute } from "./modules/notification";
@@ -46,6 +46,7 @@ app.use((err, req, res, next) => {
 
 // Define routes
 app.use("/api/profiles", profileRoute);
+app.use("/api/me", meRoute);
 app.use("/api/interests", interestRoute);
 app.use("/api/interactions", getInteractionRoute(notificationEvent));
 app.use("/api/notifications", getNotificationRoute(notiService));

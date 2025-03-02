@@ -43,8 +43,6 @@ const options = {
 
 const swaggerSpec = swaggerJSDoc(options);
 
-console.log(swaggerSpec);
-
 export function swaggerDocs(app: Express, port: string) {
   app.use("/swagger", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   console.log(`Swagger docs available at http://localhost:${port}/swagger`);
