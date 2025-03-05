@@ -18,5 +18,6 @@ export default defineConfig({
     "room",
     "chat",
     "settings",
+    "message",
   ],
 });
