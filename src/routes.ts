@@ -297,6 +297,20 @@ export function registerRoute(app: Express, io: Server) {
 
 	/**
 	 * @swagger
+	 * /api/interactions/pending:
+	 *   get:
+	 *     description: Get my pending interactions
+	 *     tags: [Interactions]
+	 *     responses:
+	 *       200:
+	 *         description: Returns a list of pending interactions
+	 *       401:
+	 *         description: Unauthorized
+	 */
+	interactionsRoute.get("/pending", asyncHandler(interactionController.getPendingInteractions));
+
+	/**
+	 * @swagger
 	 * /api/notifications:
 	 *   put:
 	 *     description: Get my notifications
