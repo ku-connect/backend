@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "start": "bun src/index.ts",
+    "build": "bun build --target=bun ./src/index.ts --outdir ./build",
     "seed": "bun src/seed.ts"
   },
   "devDependencies": {
