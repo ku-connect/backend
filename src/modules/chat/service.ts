@@ -63,7 +63,7 @@ export class ChatService {
 			const user = await getUserById(targetUserId);
 			const userMetaData = user.rawUserMetaData as Recipient;
 			// message
-			const lastMessages = await chatRepository.getLastMessage(db, targetUserId);
+			const lastMessages = await chatRepository.getLastMessage(db, chat.id);
 			const unreadCount = await chatRepository.getNumberOfUnreadMessagesInChat(db, chat.id, userId);
 			return {
 				chat_id: chat.id,
