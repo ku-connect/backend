@@ -17,6 +17,6 @@ jobs:
       - name: Deploy to production
         env:
           deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
-          img_url: ${{ vars.DOCKERHUB_USERNAME }}%2fku-connect-api%3A${{ steps.commit_sha.outputs.sha_short }}
+          img_url: docker.io%2f${{ vars.DOCKERHUB_USERNAME }}%2fku-connect-api%3A${{ steps.commit_sha.outputs.sha_short }}
         run: |
           curl "$deploy_url&imgUrl=$img_url"
