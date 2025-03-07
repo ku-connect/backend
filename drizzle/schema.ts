@@ -140,33 +140,24 @@ export const usersInAuth = auth.table(
 	]
 );
 
-export const profileInPrivate = _private.table(
-	"profile",
-	{
-		id: uuid().defaultRandom().primaryKey().notNull(),
-		userId: uuid("user_id").notNull(),
-		displayName: varchar("display_name", { length: 255 }),
-		bio: varchar({ length: 255 }),
-		birthdate: date(),
-		faculty: varchar({ length: 255 }),
-		department: varchar({ length: 255 }),
-		year: varchar({ length: 255 }),
-		line: varchar({ length: 255 }),
-		facebook: varchar({ length: 255 }),
-		instagram: varchar({ length: 255 }),
-		other: varchar({ length: 255 }),
-		embedding: vector({ dimensions: 768 }),
-		createdTime: timestamp("created_time", { mode: "string" }).defaultNow().notNull(),
-		updatedTime: timestamp("updated_time", { mode: "string" }).defaultNow().notNull(),
-		image: varchar({ length: 512 }),
-	},
-	(table) => [
-		check(
-			"profile_year_check",
-			sql`(year)::text = ANY ((ARRAY['1'::character varying, '2'::character varying, '3'::character varying, '4'::character varying, '>4'::character varying])::text[])`
-		),
-	]
-);
+export const profileInPrivate = _private.table("profile", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	userId: uuid("user_id").notNull(),
+	displayName: varchar("display_name", { length: 255 }),
+	bio: varchar({ length: 255 }),
+	birthdate: date(),
+	faculty: varchar({ length: 255 }),
+	department: varchar({ length: 255 }),
+	year: varchar({ length: 255 }),
+	line: varchar({ length: 255 }),
+	facebook: varchar({ length: 255 }),
+	instagram: varchar({ length: 255 }),
+	other: varchar({ length: 255 }),
+	embedding: vector({ dimensions: 768 }),
+	createdTime: timestamp("created_time", { mode: "string" }).defaultNow().notNull(),
+	updatedTime: timestamp("updated_time", { mode: "string" }).defaultNow().notNull(),
+	image: varchar({ length: 512 }),
+});
 
 export const chatInPrivate = _private.table(
 	"chat",
