@@ -11,7 +11,7 @@ import { NotificationEvent } from "./modules/notification/event";
 import { NotificationService } from "./modules/notification/service";
 import { readNotificationSchema } from "./modules/notification/type";
 import profileController from "./modules/profile/controller";
-import { profileRequestSchema } from "./modules/profile/type";
+import { createProfileRequestSchema, updateProfileRequestSchema } from "./modules/profile/type";
 import settingsController from "./modules/settings/controller";
 import { settingsRequestSchema } from "./modules/settings/type";
 import { asyncHandler } from "./utils/utils";
@@ -152,7 +152,7 @@ export function registerRoute(app: Express, io: Server) {
 	 *       401:
 	 *         description: Unauthorized
 	 */
-	profileRoute.post("/", valdiateReq(profileRequestSchema), asyncHandler(profileController.createProfile));
+	profileRoute.post("/", valdiateReq(createProfileRequestSchema), asyncHandler(profileController.createProfile));
 
 	/**
 	 * @swagger
@@ -211,7 +211,7 @@ export function registerRoute(app: Express, io: Server) {
 	 *       401:
 	 *         description: Unauthorized
 	 */
-	profileRoute.put("/", valdiateReq(profileRequestSchema), asyncHandler(profileController.updateProfile));
+	profileRoute.put("/", valdiateReq(updateProfileRequestSchema), asyncHandler(profileController.updateProfile));
 
 	/**
 	 * @swagger
