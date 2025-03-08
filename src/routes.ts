@@ -270,14 +270,14 @@ export function registerRoute(app: Express, io: Server) {
 	/**
 	 * @swagger
 	 * /api/settings/me:
-	 *   put:
-	 *     description: Update settings
+	 *   patch:
+	 *     description: Update my settings
 	 *     tags: [Settings]
 	 *     responses:
 	 *       200:
 	 *         description: Returns updated settings
 	 */
-	settingsRoute.put("/", valdiateReq(settingsRequestSchema), asyncHandler(settingsController.updateMySettings));
+	settingsRoute.patch("/", valdiateReq(settingsRequestSchema), asyncHandler(settingsController.updateMySettings));
 
 	/**
 	 * @swagger

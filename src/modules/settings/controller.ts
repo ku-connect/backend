@@ -2,23 +2,23 @@ import { type Request, type Response } from "express";
 import settingsService from "./service";
 
 async function getMySettings(req: Request, res: Response) {
-  const userId = req.user?.sub;
+	const userId = req.user?.sub;
 
-  const settings = await settingsService.getUserSettings(userId);
+	const settings = await settingsService.getUserSettings(userId);
 
-  res.json(settings);
+	res.json(settings);
 }
 
 async function updateMySettings(req: Request, res: Response) {
-  const settings = req.body;
-  const userId = req.user.sub;
+	const settings = req.body;
+	const userId = req.user.sub;
 
-  const result = await settingsService.updateUserSettings(settings, userId);
+	const result = await settingsService.updateUserSettings(settings, userId);
 
-  res.json(result);
+	res.json(result);
 }
 
 export default {
-  getMySettings,
-  updateMySettings,
+	getMySettings,
+	updateMySettings,
 };
