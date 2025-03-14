@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { chatInPrivate, messageInPrivate, usersInAuth, settingsInPrivate, notificationInPrivate, interestInPrivate, userInterestInPrivate, interactionInPrivate } from "./schema";
+import { chatInPrivate, messageInPrivate, usersInAuth, notificationInPrivate, settingsInPrivate, interestInPrivate, userInterestInPrivate, interactionInPrivate } from "./schema";
 
 export const messageInPrivateRelations = relations(messageInPrivate, ({one}) => ({
 	chatInPrivate: one(chatInPrivate, {
@@ -28,6 +28,7 @@ export const chatInPrivateRelations = relations(chatInPrivate, ({one, many}) => 
 
 export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
 	messageInPrivates: many(messageInPrivate),
+	notificationInPrivates: many(notificationInPrivate),
 	chatInPrivates_user1: many(chatInPrivate, {
 		relationName: "chatInPrivate_user1_usersInAuth_id"
 	}),
@@ -35,7 +36,6 @@ export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
 		relationName: "chatInPrivate_user2_usersInAuth_id"
 	}),
 	settingsInPrivates: many(settingsInPrivate),
-	notificationInPrivates: many(notificationInPrivate),
 	userInterestInPrivates: many(userInterestInPrivate),
 	interactionInPrivates_fromUserId: many(interactionInPrivate, {
 		relationName: "interactionInPrivate_fromUserId_usersInAuth_id"
@@ -45,16 +45,16 @@ export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
 	}),
 }));
 
-export const settingsInPrivateRelations = relations(settingsInPrivate, ({one}) => ({
+export const notificationInPrivateRelations = relations(notificationInPrivate, ({one}) => ({
 	usersInAuth: one(usersInAuth, {
-		fields: [settingsInPrivate.userId],
+		fields: [notificationInPrivate.userId],
 		references: [usersInAuth.id]
 	}),
 }));
 
-export const notificationInPrivateRelations = relations(notificationInPrivate, ({one}) => ({
+export const settingsInPrivateRelations = relations(settingsInPrivate, ({one}) => ({
 	usersInAuth: one(usersInAuth, {
-		fields: [notificationInPrivate.userId],
+		fields: [settingsInPrivate.userId],
 		references: [usersInAuth.id]
 	}),
 }));

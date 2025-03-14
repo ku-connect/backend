@@ -159,6 +159,26 @@ export const profileInPrivate = _private.table("profile", {
 	image: varchar({ length: 512 }),
 });
 
+export const notificationInPrivate = _private.table(
+	"notification",
+	{
+		id: uuid().defaultRandom().primaryKey().notNull(),
+		userId: uuid("user_id").notNull(),
+		data: jsonb().notNull(),
+		type: varchar({ length: 255 }).notNull(),
+		readAt: timestamp("read_at", { mode: "string" }),
+		createdTime: timestamp("created_time", { mode: "string" }).defaultNow().notNull(),
+		updatedTime: timestamp("updated_time", { mode: "string" }).defaultNow().notNull(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.userId],
+			foreignColumns: [usersInAuth.id],
+			name: "notification_user_id_fkey",
+		}).onDelete("cascade"),
+	]
+);
+
 export const chatInPrivate = _private.table(
 	"chat",
 	{
@@ -208,26 +228,6 @@ export const settingsInPrivate = _private.table(
 	]
 );
 
-export const notificationInPrivate = _private.table(
-	"notification",
-	{
-		id: uuid().defaultRandom().primaryKey().notNull(),
-		userId: uuid("user_id").notNull(),
-		data: jsonb().notNull(),
-		type: varchar({ length: 255 }).notNull(),
-		readAt: timestamp("read_at", { mode: "string" }),
-		createdTime: timestamp("created_time", { mode: "string" }).defaultNow().notNull(),
-		updatedTime: timestamp("updated_time", { mode: "string" }).defaultNow().notNull(),
-	},
-	(table) => [
-		foreignKey({
-			columns: [table.userId],
-			foreignColumns: [usersInAuth.id],
-			name: "notification_user_id_fkey",
-		}),
-	]
-);
-
 export const userInterestInPrivate = _private.table(
 	"user_interest",
 	{
@@ -263,12 +263,12 @@ export const interactionInPrivate = _private.table(
 			columns: [table.fromUserId],
 			foreignColumns: [usersInAuth.id],
 			name: "interaction_from_user_id_fkey",
-		}),
+		}).onDelete("cascade"),
 		foreignKey({
 			columns: [table.toUserId],
 			foreignColumns: [usersInAuth.id],
 			name: "interaction_to_user_id_fkey",
-		}),
+		}).onDelete("cascade"),
 		primaryKey({ columns: [table.fromUserId, table.toUserId], name: "interaction_pkey" }),
 	]
 );
