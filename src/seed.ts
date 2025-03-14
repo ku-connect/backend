@@ -348,9 +348,8 @@ async function seed() {
 	const profiles: any = [];
 	for (const user of users) {
 		// const interests = mockInterests[userId];
-		const embedding = await generateEmbeddings(
-			`I interested in ${interests.map((interest: any) => interest.name).join(", ")}`
-		);
+		const prompt = `I interested in ${user.interests.map((interest: any) => interest.name).join(", ")}`;
+		const embedding = await generateEmbeddings(prompt);
 		profiles.push({
 			userId: user.id,
 			displayName: user.profile.displayName,
