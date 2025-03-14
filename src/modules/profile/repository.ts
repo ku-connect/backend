@@ -84,6 +84,7 @@ export async function updateProfile(db: DB, profile: UpdateProfileRequest, userI
 			facebook: profile.facebook,
 			instagram: profile.instagram,
 			other: profile.other,
+			image: profile.image,
 		})
 		.where(eq(profileInPrivate.userId, userId))
 		.returning()

@@ -17,6 +17,7 @@ export const createProfileRequestSchema = z.object({
 export const updateProfileRequestSchema = z.object({
 	displayName: z.string().max(255),
 	bio: z.string().max(255).optional(),
+	image: z.string().max(512).optional(),
 	birthdate: z.coerce.date().optional(),
 	faculty: z.string().max(255),
 	department: z.string().max(255),
