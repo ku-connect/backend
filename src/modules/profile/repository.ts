@@ -53,6 +53,7 @@ export async function createProfile(db: DB, profile: CreateProfileRequest, userI
 		.values({
 			displayName: profile.displayName,
 			bio: profile.bio,
+			image: profile.image,
 			birthdate: profile.birthdate?.toISOString(),
 			faculty: profile.faculty,
 			department: profile.department,

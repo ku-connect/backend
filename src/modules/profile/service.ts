@@ -19,6 +19,7 @@ import {
 	findInterests,
 } from "./repository";
 import { findInteractionsFromUserId } from "../interactions/repository";
+import { getUserById } from "../user/service";
 
 async function getProfiles(page: number, size: number, userId: string) {
 	const profile = await findProfile(db, userId);
@@ -100,9 +101,19 @@ async function createProfile(profile: CreateProfileRequest, userId: string) {
 	}
 
 	await db.transaction(async (tx) => {
+		const user = await getUserById(userId);
+		const userMetaData = user.rawUserMetaData as any;
+
 		// Generate embeddings
 		const existingInterests = await findInterestsByIds(tx, interests);
 		const embeddings = await generateEmbeddings(generatePrompt(existingInterests.map((interest) => interest.name)));
+
+		if (!profile.displayName) {
+			profile.displayName = userMetaData["name"];
+		}
+		if (!profile.image) {
+			profile.image = userMetaData["avatar_url"];
+		}
 
 		const result = await createProfileRepo(tx, profile, userId, embeddings);
 		insertedId = result.insertedId;

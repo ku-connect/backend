@@ -3,6 +3,7 @@ import { z } from "zod";
 export const createProfileRequestSchema = z.object({
 	displayName: z.string().max(255),
 	bio: z.string().max(255).optional(),
+	image: z.string().max(512).optional(),
 	birthdate: z.coerce.date().optional(),
 	faculty: z.string().max(255),
 	department: z.string().max(255),
