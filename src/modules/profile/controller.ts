@@ -43,9 +43,9 @@ async function updateProfile(req: Request, res: Response) {
 	const profile = req.body;
 	const userId = req.user.sub;
 
-	await profileService.updateProfile(profile, userId);
+	const updatedProfile = await profileService.updateProfile(profile, userId);
 
-	res.sendStatus(200);
+	res.json(updatedProfile);
 }
 
 async function getMyInterests(req: Request, res: Response) {

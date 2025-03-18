@@ -122,7 +122,9 @@ function generatePrompt(interests: string[]) {
 }
 
 async function updateProfile(profile: UpdateProfileRequest, userId: string) {
-	return updateProfileRepo(db, profile, userId);
+	await updateProfileRepo(db, profile, userId);
+
+	return getProfileWithInterestsByUserId(userId, userId);
 }
 
 async function getUserInterests(userId: string) {
