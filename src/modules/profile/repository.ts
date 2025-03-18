@@ -69,8 +69,6 @@ export async function createProfile(db: DB, profile: CreateProfileRequest, userI
 }
 
 export async function updateProfile(db: DB, profile: UpdateProfileRequest, userId: string) {
-	console.log(profile);
-
 	return db
 		.update(profileInPrivate)
 		.set({

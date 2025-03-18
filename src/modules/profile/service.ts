@@ -126,25 +126,28 @@ async function updateProfile(profile: UpdateProfileRequest, userId: string) {
 }
 
 async function getUserInterests(userId: string) {
-	return findInterestsByUserId(db, userId);
+	const interests = await findInterestsByUserId(db, userId);
+	return interests.map((interest) => omit(interest, ["userId"]));
 }
 
-async function updateUserInterest(userId: string, interests: string[]) {
+async function updateUserInterest(userId: string, interestIds: string[]) {
 	await db.transaction(async (tx) => {
 		// clean up user interests
 		await deleteUserInterests(tx, userId);
 
 		// update user interests (if < 0 mean user remove all their interests)
-		if (interests.length > 0) {
-			await createUserInterests(tx, userId, interests);
+		if (interestIds.length > 0) {
+			await createUserInterests(tx, userId, interestIds);
 
 			// generate embeddings
-			const existingInterests = await findInterestsByIds(tx, interests);
+			const existingInterests = await findInterestsByIds(tx, interestIds);
 			const embeddings = await generateEmbeddings(generatePrompt(existingInterests.map((interest) => interest.name)));
 
 			await updateProfileEmbedding(tx, userId, embeddings);
 		}
 	});
+
+	return getUserInterests(userId);
 }
 
 async function getInterests() {
