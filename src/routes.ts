@@ -10,11 +10,12 @@ import { NotificationController } from "./modules/notification/controller";
 import { NotificationEvent } from "./modules/notification/event";
 import { NotificationService } from "./modules/notification/service";
 import { readNotificationSchema } from "./modules/notification/type";
-import profileController from "./modules/profile/controller";
 import { createProfileRequestSchema, updateProfileRequestSchema } from "./modules/profile/type";
 import settingsController from "./modules/settings/controller";
 import { settingsRequestSchema } from "./modules/settings/type";
 import { asyncHandler } from "./utils/utils";
+import ProfileService from "./modules/profile/service";
+import ProfileController from "./modules/profile/controller";
 
 export function registerRoute(app: Express, io: Server) {
 	const profileRoute = express.Router();
@@ -36,6 +37,9 @@ export function registerRoute(app: Express, io: Server) {
 	// chat
 	const chatService = new ChatService(io);
 	const chatController = new ChatController(chatService);
+	// profile
+	const profileService = new ProfileService(notificationEvent);
+	const profileController = new ProfileController(profileService);
 
 	profileRoute.use(authorize);
 	meRoute.use(authorize);
@@ -70,7 +74,7 @@ export function registerRoute(app: Express, io: Server) {
 	 *       401:
 	 *         description: Unauthorized
 	 */
-	meRoute.get("/profile", asyncHandler(profileController.getMyProflie));
+	meRoute.get("/profile", asyncHandler(profileController.getMyProfile));
 
 	/**
 	 * @swagger

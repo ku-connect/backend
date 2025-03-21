@@ -21,10 +21,6 @@ const io = new Server(server, {
 	},
 });
 
-// Initialize service provider
-const notiService = new NotificationService(io);
-const notificationEvent = new NotificationEvent(notiService);
-
 const PORT = config.PORT;
 
 // Middleware to parse JSON data
@@ -45,14 +41,25 @@ registerRoute(app, io);
 
 // Route for test purpose
 app.post("/test/noti", async (req, res) => {
-	console.log("Sending Notification...");
+	// Initialize service provider
+	const notiService = new NotificationService(io);
+	const notificationEvent = new NotificationEvent(notiService);
+
+	console.log("[Test] Sending Notification...");
 
 	notificationEvent.sendNewInteractionEvent(
 		"2f740ed7-b90d-45ac-9a59-85ebd669391a",
 		"2f740ed7-b90d-45ac-9a59-85ebd669391a"
 	);
 
-	console.log("Finish");
+	notificationEvent.sendNewConnectionEvent(
+		"2f740ed7-b90d-45ac-9a59-85ebd669391a",
+		"2f740ed7-b90d-45ac-9a59-85ebd669391a"
+	);
+
+	notificationEvent.sendWelcomeEvent("2f740ed7-b90d-45ac-9a59-85ebd669391a");
+
+	console.log("[Test] Finish");
 	res.sendStatus(StatusCodes.OK);
 });
 

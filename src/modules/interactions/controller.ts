@@ -1,5 +1,5 @@
 import { type Request, type Response } from "express";
-import { createInteractions, getInteraction, getPendingInteractions } from "./service";
+import { createInteractions, getInteraction, getPendingInteractions, isConnected } from "./service";
 import { getUserById } from "../user/service";
 import { NotificationEvent } from "../notification/event";
 import { StatusCodes } from "http-status-codes";
@@ -44,6 +44,12 @@ export class InteractionController {
 		await createInteractions(fromUserId, toUserId, liked);
 		if (liked) {
 			this.notificationEvent.sendNewInteractionEvent(fromUserId, toUserId);
+			const connect = await isConnected(fromUserId, toUserId)
+			if (connect) {
+				// Sending notification to 2 users that there are connected
+				this.notificationEvent.sendNewConnectionEvent(fromUserId, toUserId);
+				this.notificationEvent.sendNewConnectionEvent(toUserId, fromUserId);
+			}
 		}
 
 		res.sendStatus(StatusCodes.OK);
