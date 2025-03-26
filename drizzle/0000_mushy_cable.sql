@@ -5,46 +5,46 @@
 */
 
 CREATE SCHEMA _private;
+CREATE TYPE _private.visibility AS ENUM ('private', 'connected', 'public');
 
 CREATE TABLE _private.profile (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES auth.users(id),
+    user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id),
     display_name VARCHAR(255),
     bio VARCHAR(255),
+    image VARCHAR(512),
     birthdate DATE,
     faculty VARCHAR(255),
     department VARCHAR(255),
-    year VARCHAR(255) CHECK (year IN ('1', '2', '3', '4', '>4')),
+    year VARCHAR(255),
     line VARCHAR(255),
     facebook VARCHAR(255),
     instagram VARCHAR(255),
     other VARCHAR(255),
-    embedding vector(768),
+    embedding VECTOR(768),
     created_time TIMESTAMP NOT NULL DEFAULT now(),
     updated_time TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE _private.interest (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE _private.user_interest (
-    interest_id UUID NOT NULL REFERENCES _private.interest(id),
-    user_id UUID NOT NULL REFERENCES auth.users(id),
+    interest_id UUID NOT NULL REFERENCES _private.interest(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     PRIMARY KEY (interest_id, user_id)
 );
 
 CREATE TABLE _private.interaction (
-    from_user_id UUID NOT NULL REFERENCES auth.users(id),
-    to_user_id UUID NOT NULL REFERENCES auth.users(id),
+    from_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    to_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     liked BOOLEAN NOT NULL,
     created_time TIMESTAMP NOT NULL DEFAULT now(),
     updated_time TIMESTAMP NOT NULL DEFAULT now(),
     PRIMARY KEY (from_user_id, to_user_id)
 );
-
-CREATE TYPE _private.visibility AS ENUM ('private', 'connected', 'public');
 
 CREATE TABLE _private.settings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -60,7 +60,7 @@ CREATE TABLE _private.settings (
 
 CREATE TABLE _private.notification (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES auth.users(id),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     data JSONB NOT NULL,
     type VARCHAR(255) NOT NULL,
     read_at TIMESTAMP,
@@ -76,8 +76,8 @@ CREATE TABLE _private.room (
 
 CREATE TABLE _private.chat (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    room_id UUID NOT NULL REFERENCES _private.room(id),
-    author_id UUID NOT NULL REFERENCES auth.users(id),
+    room_id UUID NOT NULL REFERENCES _private.room(id) ON DELETE CASCADE,
+    author_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     message VARCHAR(255) NOT NULL,
     read_at TIMESTAMP,
     created_time TIMESTAMP NOT NULL DEFAULT now(),
