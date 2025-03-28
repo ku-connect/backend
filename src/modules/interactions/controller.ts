@@ -54,7 +54,7 @@ export class InteractionController {
 
 				// Check if the chat already exists
 				const isChatExist = await isAlreadyInChat(db,fromUserId, toUserId);
-				if (isChatExist) {
+				if (isChatExist && isChatExist.length > 0) {
 					res.json({
 						connected: true,
 						chatId: isChatExist[0].id,
