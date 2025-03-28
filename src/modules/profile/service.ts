@@ -38,10 +38,9 @@ class ProfileService {
 		);
 		const interact = await findInteractionsFromUserId(db, userId, false);
 		const dislikedUserIds = interact.map((t) => t.toUserId);
-
 		return {
 			profiles: profiles
-				.filter((profile) => !dislikedUserIds.includes(profile.id))
+				.filter((profile) => !dislikedUserIds.includes(profile.userId))
 				.map(this.tryOmitContactInfo)
 				.map((profile) => ({
 					...profile,
