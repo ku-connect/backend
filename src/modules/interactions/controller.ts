@@ -1,8 +1,10 @@
 import { type Request, type Response } from "express";
-import { createInteractions, getInteraction, getPendingInteractions, isConnected } from "./service";
-import { getUserById } from "../user/service";
-import { NotificationEvent } from "../notification/event";
 import { StatusCodes } from "http-status-codes";
+import { db } from "../../db";
+import { createChat, isAlreadyInChat } from "../chat/repository";
+import { NotificationEvent } from "../notification/event";
+import { getUserById } from "../user/service";
+import { createInteractions, getInteraction, getPendingInteractions, isConnected } from "./service";
 
 export class InteractionController {
 	private notificationEvent: NotificationEvent;
@@ -44,15 +46,38 @@ export class InteractionController {
 		await createInteractions(fromUserId, toUserId, liked);
 		if (liked) {
 			this.notificationEvent.sendNewInteractionEvent(fromUserId, toUserId);
-			const connect = await isConnected(fromUserId, toUserId)
+			const connect = await isConnected(fromUserId, toUserId);
 			if (connect) {
 				// Sending notification to 2 users that there are connected
 				this.notificationEvent.sendNewConnectionEvent(fromUserId, toUserId);
 				this.notificationEvent.sendNewConnectionEvent(toUserId, fromUserId);
+
+				// Check if the chat already exists
+				const isChatExist = await isAlreadyInChat(db,fromUserId, toUserId);
+				if (isChatExist) {
+					res.json({
+						connected: true,
+						chatId: isChatExist[0].id,
+					});
+					return;
+				}
+				// Create chat
+				const chatId = await createChat(db, fromUserId, toUserId);
+				console.log("create chat", chatId);
+
+				res.json({
+					connected: true,
+					chatId: chatId[0].chatId,
+				});
+				return;
 			}
+			res.json({
+				connected: false,
+			});
+			return;
 		}
 
-		res.sendStatus(StatusCodes.OK);
+		res.status(StatusCodes.OK);
 	};
 
 	getPendingInteractions = async (req: Request, res: Response) => {

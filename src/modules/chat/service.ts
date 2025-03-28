@@ -37,9 +37,7 @@ export class ChatService {
 			socket.on("mark_as_read", async (chatId: string, userId: string) => {
 				console.log("mark_as_read", chatId, userId);
 				const unreadMessages = await chatRepository.getUnreadMessagesInChat(db, chatId, userId);
-				console.log("unreadMessages", unreadMessages);
 				unreadMessages.forEach(async (message) => {
-					console.log("read_message", message.id);
 					await chatRepository.updateReadStatusByMessageId(db, message.id, true);
 					this.io.to(chatId).emit("read_message", message.id);
 				});

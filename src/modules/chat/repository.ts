@@ -60,7 +60,7 @@ export async function getLastMessage(db: DB, chatId: string) {
 
 // chat
 
-export async function insertChat(db: DB, user1: string, user2: string) {
+export async function createChat(db: DB, user1: string, user2: string) {
 	console.log("insert Chat", user1, user2, "to db");
 	return db
 		.insert(chatInPrivate)
@@ -68,7 +68,20 @@ export async function insertChat(db: DB, user1: string, user2: string) {
 			user1,
 			user2,
 		})
-		.returning();
+		.returning({ chatId: chatInPrivate.id });
+}
+
+export async function isAlreadyInChat(db: DB, user1: string, user2: string) {
+	return db
+		.select()
+		.from(chatInPrivate)
+		.where(
+			or(
+				and(eq(chatInPrivate.user1, user1), eq(chatInPrivate.user2, user2)),
+				and(eq(chatInPrivate.user1, user2), eq(chatInPrivate.user2, user1))
+			)
+		)
+		.limit(1);
 }
 
 export async function listChat(db: DB, userId: string) {
@@ -90,7 +103,7 @@ export default {
 	getNumberOfUnreadMessagesInChat,
 	getUnreadMessagesInChat,
 	insertMessage,
-	createChat: insertChat,
+	createChat,
 	listChat,
 	getChat,
 	getMessagesByChatId,
