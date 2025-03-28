@@ -55,7 +55,12 @@ export async function getMessagesByChatId(db: DB, chatId: string) {
 }
 
 export async function getLastMessage(db: DB, chatId: string) {
-	return db.select().from(messageInPrivate).where(eq(messageInPrivate.chatId, chatId)).orderBy(desc(messageInPrivate.createdTime)).limit(1);
+	return db
+		.select()
+		.from(messageInPrivate)
+		.where(eq(messageInPrivate.chatId, chatId))
+		.orderBy(desc(messageInPrivate.createdTime))
+		.limit(1);
 }
 
 // chat

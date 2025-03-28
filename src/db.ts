@@ -6,7 +6,7 @@ const connectionString = config.DATABASE_URL;
 
 // Disable prefetch as it is not supported for "Transaction" pool mode
 export const client = postgres(connectionString, { prepare: false });
-export const db = drizzle(client, { logger: true });
+export const db = drizzle(client, { logger: false });
 
 type DatabaseType = typeof db;
 type TransactionType = Parameters<Parameters<DatabaseType["transaction"]>[0]>[0];

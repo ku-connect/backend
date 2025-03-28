@@ -1,8 +1,9 @@
 import type { Server } from "socket.io";
 import { db } from "../../db";
+import { findProfile } from "../profile/repository";
 import { getUserById } from "../user/service";
 import chatRepository from "./repository";
-import type { Message, Recipient } from "./type";
+import type { Message } from "./type";
 
 export class ChatService {
 	private io: Server;
@@ -58,15 +59,14 @@ export class ChatService {
 		const chatList = chats.map(async (chat) => {
 			// user
 			const targetUserId = userId === chat.user1 ? chat.user2 : chat.user1;
-			const user = await getUserById(targetUserId);
-			const userMetaData = user.rawUserMetaData as Recipient;
+			const targetUserProfile = await findProfile(db, targetUserId);
 			// message
 			const lastMessages = await chatRepository.getLastMessage(db, chat.id);
 			const unreadCount = await chatRepository.getNumberOfUnreadMessagesInChat(db, chat.id, userId);
 			return {
 				chat_id: chat.id,
-				name: userMetaData.name,
-				avatar: userMetaData.picture,
+				name: targetUserProfile.displayName,
+				avatar: targetUserProfile.image,
 				last_message: {
 					content: lastMessages[0]?.content || "",
 					createdTime: lastMessages[0]?.createdTime || "",
@@ -84,10 +84,10 @@ export class ChatService {
 		}
 		const targetUserId = userId === user1 ? user2 : user1;
 		const targetUser = await getUserById(targetUserId);
-		const targetUserMetaData = targetUser.rawUserMetaData as Recipient;
+		const targetUserProfile = await findProfile(db, targetUserId);
 		const targetUserData = {
-			name: targetUserMetaData.name,
-			avatar: targetUserMetaData.picture,
+			name: targetUserProfile.displayName,
+			avatar: targetUserProfile.image,
 		};
 
 		const messages = await chatRepository.getMessagesByChatId(db, chatId);
