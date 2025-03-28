@@ -60,24 +60,30 @@ export class ChatService {
 
 	listChat = async (userId: string) => {
 		const chats = await chatRepository.listChat(db, userId);
-		const chatList = chats.map(async (chat) => {
-			// user
-			const targetUserId = userId === chat.user1 ? chat.user2 : chat.user1;
-			const targetUserProfile = await findProfile(db, targetUserId);
-			// message
-			const lastMessages = await chatRepository.getLastMessage(db, chat.id);
-			const unreadCount = await chatRepository.getNumberOfUnreadMessagesInChat(db, chat.id, userId);
-			return {
-				chat_id: chat.id,
-				name: targetUserProfile.displayName,
-				avatar: targetUserProfile.image,
-				last_message: {
-					content: lastMessages[0]?.content || "",
-					createdTime: lastMessages[0]?.createdTime || "",
-				},
-				unread_count: unreadCount[0]?.count || 0,
-			};
+		const chatList = await Promise.all(
+			chats.map(async (chat) => {
+				// user
+				const targetUserId = userId === chat.user1 ? chat.user2 : chat.user1;
+				const targetUserProfile = await findProfile(db, targetUserId);
+				// message
+				const lastMessages = await chatRepository.getLastMessage(db, chat.id);
+				const unreadCount = await chatRepository.getNumberOfUnreadMessagesInChat(db, chat.id, userId);
+				return {
+					chat_id: chat.id,
+					name: targetUserProfile.displayName,
+					avatar: targetUserProfile.image,
+					last_message: {
+						content: lastMessages[0]?.content || "",
+						createdTime: lastMessages[0]?.createdTime || "",
+					},
+					unread_count: unreadCount[0]?.count || 0,
+				};
+			})
+		);
+		chatList.sort((a, b) => {
+			return new Date(b.last_message.createdTime).getTime() - new Date(a.last_message.createdTime).getTime();
 		});
+
 		return Promise.all(chatList);
 	};
 
