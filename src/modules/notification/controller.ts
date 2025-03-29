@@ -10,6 +10,21 @@ export class NotificationController {
 		this.notificationService = notificationService;
 	}
 
+	/**
+	 * Allow clients to subscribe to this application server for notifications
+	 * via web-push
+	 */
+	subscribe = async (req: Request, res: Response) => {
+		const userId = req.user?.sub;
+		const subscription = req.body.subscription;
+
+		console.log(userId, subscription);
+
+		await this.notificationService.subscribe(userId, subscription);
+
+		res.json({ success: true });
+	};
+
 	getMyNotifications = async (req: Request, res: Response) => {
 		const { page = 1, size = 10 } = req.query;
 		const userId = req.user?.sub;

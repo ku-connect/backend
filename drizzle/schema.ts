@@ -6,6 +6,8 @@ import {
 	varchar,
 	timestamp,
 	boolean,
+	date,
+	vector,
 	uniqueIndex,
 	index,
 	unique,
@@ -13,8 +15,6 @@ import {
 	jsonb,
 	text,
 	smallint,
-	date,
-	vector,
 	primaryKey,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -66,6 +66,35 @@ export const messageInPrivate = _private.table(
 			foreignColumns: [usersInAuth.id],
 			name: "message_user_id_fkey",
 		}),
+	]
+);
+
+export const profileInPrivate = _private.table(
+	"profile",
+	{
+		id: uuid().defaultRandom().primaryKey().notNull(),
+		userId: uuid("user_id").notNull(),
+		displayName: varchar("display_name", { length: 255 }),
+		bio: varchar({ length: 255 }),
+		birthdate: date(),
+		faculty: varchar({ length: 255 }),
+		department: varchar({ length: 255 }),
+		year: varchar({ length: 255 }),
+		line: varchar({ length: 255 }),
+		facebook: varchar({ length: 255 }),
+		instagram: varchar({ length: 255 }),
+		other: varchar({ length: 255 }),
+		embedding: vector({ dimensions: 768 }),
+		createdTime: timestamp("created_time", { mode: "string" }).defaultNow().notNull(),
+		updatedTime: timestamp("updated_time", { mode: "string" }).defaultNow().notNull(),
+		image: varchar({ length: 512 }),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.userId],
+			foreignColumns: [usersInAuth.id],
+			name: "fk_user_id",
+		}).onDelete("cascade"),
 	]
 );
 
@@ -140,25 +169,6 @@ export const usersInAuth = auth.table(
 	]
 );
 
-export const profileInPrivate = _private.table("profile", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	userId: uuid("user_id").notNull(),
-	displayName: varchar("display_name", { length: 255 }),
-	bio: varchar({ length: 255 }),
-	birthdate: date(),
-	faculty: varchar({ length: 255 }),
-	department: varchar({ length: 255 }),
-	year: varchar({ length: 255 }),
-	line: varchar({ length: 255 }),
-	facebook: varchar({ length: 255 }),
-	instagram: varchar({ length: 255 }),
-	other: varchar({ length: 255 }),
-	embedding: vector({ dimensions: 768 }),
-	createdTime: timestamp("created_time", { mode: "string" }).defaultNow().notNull(),
-	updatedTime: timestamp("updated_time", { mode: "string" }).defaultNow().notNull(),
-	image: varchar({ length: 512 }),
-});
-
 export const notificationInPrivate = _private.table(
 	"notification",
 	{
@@ -176,6 +186,24 @@ export const notificationInPrivate = _private.table(
 			foreignColumns: [usersInAuth.id],
 			name: "notification_user_id_fkey",
 		}).onDelete("cascade"),
+	]
+);
+
+export const notiSubscriptionInPrivate = _private.table(
+	"noti_subscription",
+	{
+		id: uuid().defaultRandom().primaryKey().notNull(),
+		userId: uuid("user_id").notNull(),
+		endpoint: text().notNull(),
+		keys: jsonb().notNull(),
+	},
+	(table) => [
+		foreignKey({
+			columns: [table.userId],
+			foreignColumns: [usersInAuth.id],
+			name: "noti_subscription_user_id_fkey",
+		}).onDelete("cascade"),
+		unique("noti_subscription_endpoint_key").on(table.endpoint),
 	]
 );
 

@@ -18,5 +18,6 @@ export default defineConfig({
 		"chat",
 		"settings",
 		"message",
+		"noti_subscription",
 	],
 });

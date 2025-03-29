@@ -12,6 +12,8 @@ import { NotificationService } from "./modules/notification/service";
 import { registerRoute } from "./routes";
 import { swaggerDocs } from "./swagger";
 
+import jwt, { type JwtPayload } from "jsonwebtoken";
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -52,18 +54,32 @@ app.post("/test/noti", async (req, res) => {
 		"2f740ed7-b90d-45ac-9a59-85ebd669391a"
 	);
 
-	notificationEvent.sendNewConnectionEvent(
-		"2f740ed7-b90d-45ac-9a59-85ebd669391a",
-		"2f740ed7-b90d-45ac-9a59-85ebd669391a"
-	);
+	// notificationEvent.sendNewConnectionEvent(
+	// 	"2f740ed7-b90d-45ac-9a59-85ebd669391a",
+	// 	"2f740ed7-b90d-45ac-9a59-85ebd669391a"
+	// );
 
-	notificationEvent.sendWelcomeEvent("2f740ed7-b90d-45ac-9a59-85ebd669391a");
+	// notificationEvent.sendWelcomeEvent("2f740ed7-b90d-45ac-9a59-85ebd669391a");
 
 	console.log("[Test] Finish");
 	res.sendStatus(StatusCodes.OK);
 });
 
 io.on("connection", (socket) => {
+	const token = socket.handshake.auth.token;
+
+	// @ts-ignore
+	jwt.verify(token, config.JWT_SECRET, (err, decoded) => {
+		if (err) {
+			console.error(err);
+			throw new Error("unauthorized");
+		}
+
+		const userId = decoded.sub;
+		socket.join(decoded.sub);
+		console.log(`user id = ${userId} joined socket`);
+	});
+
 	console.log("Client connected");
 });
 

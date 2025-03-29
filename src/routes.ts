@@ -327,6 +327,18 @@ export function registerRoute(app: Express, io: Server) {
 
 	/**
 	 * @swagger
+	 * /api/notifications/subscribe:
+	 *   post:
+	 *     description: Subscribe to get web-push notification
+	 *     tags: [Notification]
+	 *     responses:
+	 *       200:
+	 *         description: OK
+	 */
+	notificationRoute.post("/subscribe", asyncHandler(notificationController.subscribe));
+
+	/**
+	 * @swagger
 	 * /api/notifications/read:
 	 *   patch:
 	 *     description: Read notifications

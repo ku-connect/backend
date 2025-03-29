@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { chatInPrivate, messageInPrivate, usersInAuth, notificationInPrivate, settingsInPrivate, interestInPrivate, userInterestInPrivate, interactionInPrivate } from "./schema";
+import { chatInPrivate, messageInPrivate, usersInAuth, profileInPrivate, notificationInPrivate, notiSubscriptionInPrivate, settingsInPrivate, interestInPrivate, userInterestInPrivate, interactionInPrivate } from "./schema";
 
 export const messageInPrivateRelations = relations(messageInPrivate, ({one}) => ({
 	chatInPrivate: one(chatInPrivate, {
@@ -28,7 +28,9 @@ export const chatInPrivateRelations = relations(chatInPrivate, ({one, many}) => 
 
 export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
 	messageInPrivates: many(messageInPrivate),
+	profileInPrivates: many(profileInPrivate),
 	notificationInPrivates: many(notificationInPrivate),
+	notiSubscriptionInPrivates: many(notiSubscriptionInPrivate),
 	chatInPrivates_user1: many(chatInPrivate, {
 		relationName: "chatInPrivate_user1_usersInAuth_id"
 	}),
@@ -45,9 +47,23 @@ export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
 	}),
 }));
 
+export const profileInPrivateRelations = relations(profileInPrivate, ({one}) => ({
+	usersInAuth: one(usersInAuth, {
+		fields: [profileInPrivate.userId],
+		references: [usersInAuth.id]
+	}),
+}));
+
 export const notificationInPrivateRelations = relations(notificationInPrivate, ({one}) => ({
 	usersInAuth: one(usersInAuth, {
 		fields: [notificationInPrivate.userId],
+		references: [usersInAuth.id]
+	}),
+}));
+
+export const notiSubscriptionInPrivateRelations = relations(notiSubscriptionInPrivate, ({one}) => ({
+	usersInAuth: one(usersInAuth, {
+		fields: [notiSubscriptionInPrivate.userId],
 		references: [usersInAuth.id]
 	}),
 }));
