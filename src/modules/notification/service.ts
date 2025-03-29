@@ -47,7 +47,7 @@ export class NotificationService {
 			type: notificationType.NEW_CONNECTION,
 			data: {
 				title: "New Connection! 🎉",
-				message: `<span style="color: green;">${fromUser.displayName}</span> accepted your connection request. Say hello and start your journey together!`,
+				message: `You are now connected with <span style="color: green;">${fromUser.displayName}</span>. Say hello and start your journey together!`,
 			},
 			readAt: null,
 			createdTime: new Date().toISOString(),
