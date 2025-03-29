@@ -121,16 +121,21 @@ export class NotificationService {
 				keys: data.keys,
 			};
 
-			await webpush.sendNotification(
-				// @ts-ignore
-				subscription,
-				JSON.stringify({
-					title: payload.title,
-					body: payload.message,
-					// icon: "/icon.png",
-					url: payload.url,
-				})
-			);
+			try {
+				await webpush.sendNotification(
+					// @ts-ignore
+					subscription,
+					JSON.stringify({
+						title: payload.title,
+						body: payload.message,
+						// icon: "/icon.png",
+						url: payload.url,
+					})
+				);
+			} catch (err) {
+				// slient error
+				console.error(err);
+			}
 		}
 		console.log(`finish sending web push to user id = ${userId}`);
 	};
