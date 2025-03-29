@@ -4,7 +4,7 @@ import notificationRepository from "./repository";
 import settingsService from "../settings/service";
 import { notificationType } from "./type";
 import { findProfile } from "../profile/repository";
-import webpush from "../../utils/webPush";
+import webpush from "../../utils/web-push";
 
 export class NotificationService {
 	private io: Server;
