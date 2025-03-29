@@ -31,23 +31,22 @@ class ProfileService {
 
 	getProfiles = async (page: number, size: number, userId: string) => {
 		const profile = await findProfile(db, userId);
-		const profiles = await findProfilesSimilarityPaginated(db, page, size, profile);
+		const interact = await findInteractionsFromUserId(db, userId);
+		const excludeIds = interact.map((t) => t.toUserId);
+
+		const profiles = await findProfilesSimilarityPaginated(db, page, size, profile, excludeIds);
 		const interests = await findInterestsByUserIds(
 			db,
 			profiles.map((t) => t.userId)
 		);
-		const interact = await findInteractionsFromUserId(db, userId, false);
-		const dislikedUserIds = interact.map((t) => t.toUserId);
+
 		return {
-			profiles: profiles
-				.filter((profile) => !dislikedUserIds.includes(profile.userId))
-				.map(this.tryOmitContactInfo)
-				.map((profile) => ({
-					...profile,
-					interests: interests
-						.filter((interest) => interest.userId === profile.userId)
-						.map((interest) => omit(interest, ["userId"])),
-				})),
+			profiles: profiles.map(this.tryOmitContactInfo).map((profile) => ({
+				...profile,
+				interests: interests
+					.filter((interest) => interest.userId === profile.userId)
+					.map((interest) => omit(interest, ["userId"])),
+			})),
 		};
 	};
 

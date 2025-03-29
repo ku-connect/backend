@@ -2,11 +2,11 @@ import { interactionInPrivate, profileInPrivate } from "../../../drizzle/schema"
 import { takeUniqueOrThrow, type DB } from "../../db";
 import { eq, and, count, isNull } from "drizzle-orm";
 
-export async function findInteractionsFromUserId(db: DB, userId: string, liked: boolean) {
+export async function findInteractionsFromUserId(db: DB, userId: string) {
 	return db
 		.select()
 		.from(interactionInPrivate)
-		.where(and(eq(interactionInPrivate.fromUserId, userId), eq(interactionInPrivate.liked, liked)));
+		.where(and(eq(interactionInPrivate.fromUserId, userId)));
 }
 
 export async function findInteraction(db: DB, from: string, to: string) {

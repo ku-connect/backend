@@ -53,7 +53,7 @@ export class InteractionController {
 				this.notificationEvent.sendNewConnectionEvent(toUserId, fromUserId);
 
 				// Check if the chat already exists
-				const isChatExist = await isAlreadyInChat(db,fromUserId, toUserId);
+				const isChatExist = await isAlreadyInChat(db, fromUserId, toUserId);
 				if (isChatExist && isChatExist.length > 0) {
 					res.json({
 						connected: true,
@@ -77,7 +77,9 @@ export class InteractionController {
 			return;
 		}
 
-		res.status(StatusCodes.OK);
+		res.json({
+			connected: false,
+		});
 	};
 
 	getPendingInteractions = async (req: Request, res: Response) => {

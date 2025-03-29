@@ -1,10 +1,16 @@
-import { and, cosineDistance, desc, eq, getTableColumns, inArray, ne, sql } from "drizzle-orm";
+import { and, cosineDistance, desc, eq, getTableColumns, inArray, ne, notInArray, sql } from "drizzle-orm";
 import { interestInPrivate, profileInPrivate, settingsInPrivate, userInterestInPrivate } from "../../../drizzle/schema";
 import { takeUniqueOrThrow, type DB } from "../../db";
 import { omit } from "lodash";
 import type { CreateProfileRequest, UpdateProfileRequest } from "./type";
 
-export async function findProfilesSimilarityPaginated(db: DB, page: number, size: number, profile: any) {
+export async function findProfilesSimilarityPaginated(
+	db: DB,
+	page: number,
+	size: number,
+	profile: any,
+	excludeIds: string[]
+) {
 	const similarity = sql<number>`1 - (${cosineDistance(profileInPrivate.embedding, profile.embedding!)})`;
 	const offset = (page - 1) * size;
 	const profiles = await db
@@ -14,7 +20,12 @@ export async function findProfilesSimilarityPaginated(db: DB, page: number, size
 			similarity,
 		})
 		.from(profileInPrivate)
-		.where(and(ne(profileInPrivate.userId, profile.userId), eq(settingsInPrivate.profileVisibility, "public")))
+		.where(
+			and(
+				notInArray(profileInPrivate.userId, [profile.userId, ...excludeIds]),
+				eq(settingsInPrivate.profileVisibility, "public")
+			)
+		)
 		.orderBy((t) => desc(t.similarity))
 		.leftJoin(settingsInPrivate, eq(profileInPrivate.userId, settingsInPrivate.userId))
 		.limit(size)
