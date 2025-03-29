@@ -5,6 +5,7 @@ import settingsService from "../settings/service";
 import { notificationType } from "./type";
 import { findProfile } from "../profile/repository";
 import webpush from "../../utils/webPush";
+
 export class NotificationService {
 	private io: Server;
 	private key = "notification";
