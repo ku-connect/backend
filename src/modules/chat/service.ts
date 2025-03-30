@@ -4,12 +4,15 @@ import { findProfile } from "../profile/repository";
 import { getUserById } from "../user/service";
 import chatRepository from "./repository";
 import type { Message } from "./type";
+import type { NotificationEvent } from "../notification/event";
 
 export class ChatService {
 	private io: Server;
+	private notificationEvent: NotificationEvent;
 
-	public constructor(io: Server) {
+	public constructor(io: Server, notificationEvent: NotificationEvent) {
 		this.io = io;
+		this.notificationEvent = notificationEvent;
 		this.initSocketEvents();
 	}
 
@@ -33,6 +36,7 @@ export class ChatService {
 					createdTime: message.createdTime,
 				};
 				this.io.to(data.chatId).emit("receive_message", formattedMessage);
+				this.notificationEvent.sendNewMessageEvent(data);
 			});
 
 			socket.on("mark_as_read", async (chatId: string, userId: string) => {

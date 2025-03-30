@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import { NotificationService } from "./service";
 import { notificationType } from "./type";
+import type { Message } from "../chat/type";
 
 export class NotificationEvent {
 	private event = new EventEmitter();
@@ -20,6 +21,10 @@ export class NotificationEvent {
 		this.event.on(notificationType.WELCOME, async (userId) => {
 			await this.notificationService.sendWelcomeNotification(userId);
 		});
+
+		this.event.on(notificationType.NEW_MESSAGE, async (data) => {
+			await this.notificationService.sendNewMessageNotification(data);
+		});
 	}
 
 	sendNewInteractionEvent = (fromUserId: string, toUserId: string) => {
@@ -32,5 +37,9 @@ export class NotificationEvent {
 
 	sendWelcomeEvent = (userId: string) => {
 		this.event.emit(notificationType.WELCOME, userId);
+	};
+
+	sendNewMessageEvent = (data: Message) => {
+		this.event.emit(notificationType.NEW_MESSAGE, data);
 	};
 }

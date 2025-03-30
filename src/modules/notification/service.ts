@@ -1,10 +1,12 @@
 import type { Server } from "socket.io";
-import { db } from "../../db";
+import { db, takeUniqueOrThrow } from "../../db";
 import notificationRepository from "./repository";
 import settingsService from "../settings/service";
 import { notificationType } from "./type";
 import { findProfile } from "../profile/repository";
 import webpush from "../../utils/web-push";
+import type { Message } from "../chat/type";
+import { getChat } from "../chat/repository";
 
 export class NotificationService {
 	private io: Server;
@@ -104,6 +106,35 @@ export class NotificationService {
 		const result = await notificationRepository.createNotification(db, notification);
 
 		await this.sendNotificationToClient(toUserId, result);
+		await this.sendWebpushNotification(toUserId, notification.data);
+	};
+
+	sendNewMessageNotification = async (data: Message) => {
+		const author = await findProfile(db, data.authorId);
+		const chat = await getChat(db, data.chatId).then(takeUniqueOrThrow);
+
+		if (chat === null || author === null) {
+			console.error("author or chat not found");
+			return;
+		}
+
+		const toUserId = chat.user1 === data.authorId ? chat.user2 : chat.user1;
+
+		const notification = {
+			userId: toUserId,
+			type: notificationType.NEW_MESSAGE,
+			data: {
+				title: "New Message 📩",
+				message: `${author.displayName}: ${data.content}`,
+				url: `/chat/${data.chatId}`,
+			},
+			readAt: null,
+			createdTime: new Date().toISOString(),
+			updatedTime: new Date().toISOString(),
+		};
+
+		console.log("New message notification");
+
 		await this.sendWebpushNotification(toUserId, notification.data);
 	};
 

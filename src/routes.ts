@@ -35,7 +35,7 @@ export function registerRoute(app: Express, io: Server) {
 	// interaction
 	const interactionController = new InteractionController(notificationEvent);
 	// chat
-	const chatService = new ChatService(io);
+	const chatService = new ChatService(io, notificationEvent);
 	const chatController = new ChatController(chatService);
 	// profile
 	const profileService = new ProfileService(notificationEvent);
