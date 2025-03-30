@@ -6,4 +6,5 @@ export const config = {
 	PORT: process.env.PORT || "4000",
 	VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY as string,
 	VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY as string,
+	SECRET_KEY: process.env.SECRET_KEY || "secret",
 };

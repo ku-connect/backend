@@ -1,9 +1,12 @@
 // @ts-ignore
 import * as CryptoJS from "crypto-js";
+import type { NextFunction } from "express";
 
-export const asyncHandler = (fn) => (req, res, next) => {
-	return Promise.resolve(fn(req, res, next)).catch(next);
-};
+export const asyncHandler =
+	(fn: (req: Request, res: Response, next: NextFunction) => any) =>
+	(req: Request, res: Response, next: NextFunction) => {
+		return Promise.resolve(fn(req, res, next)).catch(next);
+	};
 
 export const encryptMessage = (message: string) => {
 	try {
