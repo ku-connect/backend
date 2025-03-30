@@ -98,6 +98,7 @@ export class ChatService {
 		const targetUserData = {
 			name: targetUserProfile.displayName,
 			avatar: targetUserProfile.image,
+			id: targetUserProfile.userId,
 		};
 
 		const messages = await chatRepository.getMessagesByChatId(db, chatId);
