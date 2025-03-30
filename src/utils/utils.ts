@@ -1,6 +1,7 @@
 // @ts-ignore
 import * as CryptoJS from "crypto-js";
 import type { NextFunction } from "express";
+import { config } from "../config";
 
 export const asyncHandler =
 	(fn: (req: Request, res: Response, next: NextFunction) => any) =>
@@ -10,7 +11,7 @@ export const asyncHandler =
 
 export const encryptMessage = (message: string) => {
 	try {
-		const ciphertext = CryptoJS.AES.encrypt(message, process.env.SECRET_KEY).toString();
+		const ciphertext = CryptoJS.AES.encrypt(message, config.SECRET_KEY).toString();
 		return ciphertext;
 	} catch (error) {
 		console.error("Error encrypting message:", error);
@@ -20,7 +21,7 @@ export const encryptMessage = (message: string) => {
 
 export const decryptMessage = (ciphertext: string) => {
 	try {
-		const bytes = CryptoJS.AES.decrypt(ciphertext, process.env.SECRET_KEY);
+		const bytes = CryptoJS.AES.decrypt(ciphertext, config.SECRET_KEY);
 		const originalText = bytes.toString(CryptoJS.enc.Utf8);
 		return originalText;
 	} catch (error) {
