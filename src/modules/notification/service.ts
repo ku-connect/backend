@@ -120,6 +120,12 @@ export class NotificationService {
 
 		const toUserId = chat.user1 === data.authorId ? chat.user2 : chat.user1;
 
+		const settings = await settingsService.getUserSettings(toUserId);
+		if (settings.notiNewMessage === false) {
+			console.log(`user id = ${toUserId} disable new message noti`);
+			return;
+		}
+
 		const notification = {
 			userId: toUserId,
 			type: notificationType.NEW_MESSAGE,
