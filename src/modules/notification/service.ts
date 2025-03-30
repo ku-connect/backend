@@ -79,7 +79,11 @@ export class NotificationService {
 		const result = await notificationRepository.createNotification(db, notification);
 
 		await this.sendNotificationToClient(toUserId, result);
-		await this.sendWebpushNotification(toUserId, notification.data);
+		await this.sendWebpushNotification(toUserId, {
+			title: notification.data.title,
+			message: `You are now connected with ${fromUser.displayName}. Say hello and start your journey together!`,
+			url: notification.data.url,
+		});
 	};
 
 	sendWelcomeNotification = async (toUserId: string) => {
@@ -128,7 +132,6 @@ export class NotificationService {
 					JSON.stringify({
 						title: payload.title,
 						body: payload.message,
-						// icon: "/icon.png",
 						url: payload.url,
 					})
 				);
