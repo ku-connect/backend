@@ -2,6 +2,7 @@ import { and, count, desc, eq, ne, or } from "drizzle-orm";
 import { chatInPrivate, messageInPrivate } from "../../../drizzle/schema";
 import type { DB } from "../../db";
 import type { Message } from "./type";
+import { encryptMessage } from "../../utils/utils";
 
 // message
 
@@ -43,7 +44,12 @@ export async function getUnreadMessagesInChat(db: DB, chatId: string, userId: st
 }
 
 export async function insertMessage(db: DB, data: Message) {
-	return db.insert(messageInPrivate).values(data).returning();
+	const encryptedMessage = encryptMessage(data.content);
+	const encryptedData = {
+		...data,
+		content: encryptedMessage,
+	};
+	return db.insert(messageInPrivate).values(encryptedData).returning();
 }
 
 export async function getMessagesByChatId(db: DB, chatId: string) {

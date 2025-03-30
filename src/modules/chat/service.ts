@@ -1,10 +1,11 @@
 import type { Server } from "socket.io";
 import { db } from "../../db";
+import { decryptMessage } from "../../utils/utils";
+import type { NotificationEvent } from "../notification/event";
 import { findProfile } from "../profile/repository";
 import { getUserById } from "../user/service";
 import chatRepository from "./repository";
 import type { Message } from "./type";
-import type { NotificationEvent } from "../notification/event";
 
 export class ChatService {
 	private io: Server;
@@ -31,7 +32,7 @@ export class ChatService {
 				const formattedMessage = {
 					id: message.id,
 					authorId: message.authorId,
-					content: message.content,
+					content: decryptMessage(message.content),
 					isRead: message.isRead,
 					createdTime: message.createdTime,
 				};
@@ -73,7 +74,7 @@ export class ChatService {
 					name: targetUserProfile.displayName,
 					avatar: targetUserProfile.image,
 					last_message: {
-						content: lastMessages[0]?.content || "",
+						content: decryptMessage(lastMessages[0]?.content),
 						createdTime: lastMessages[0]?.createdTime || "",
 					},
 					unread_count: unreadCount[0]?.count || 0,
@@ -105,7 +106,7 @@ export class ChatService {
 		const formattedMessage = messages.map((message) => ({
 			id: message.id,
 			authorId: message.authorId,
-			content: message.content,
+			content: decryptMessage(message.content),
 			isRead: message.isRead,
 			createdTime: message.createdTime,
 		}));
