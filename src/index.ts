@@ -4,6 +4,7 @@ import cors from "cors";
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
+import morgan from "morgan";
 
 import { StatusCodes } from "http-status-codes";
 import { config } from "./config";
@@ -39,6 +40,9 @@ app.use((err, req, res, next) => {
 	});
 });
 
+// HTTP Request Logger
+app.use(morgan("common"));
+
 registerRoute(app, io);
 
 // Route for test purpose
@@ -71,8 +75,12 @@ io.on("connection", (socket) => {
 	// @ts-ignore
 	jwt.verify(token, config.JWT_SECRET, (err, decoded) => {
 		if (err) {
-			console.error(err);
-			throw new Error("unauthorized");
+			console.error("[socket] jwt token invalid", err);
+			socket.emit("exception", {
+				error: err,
+				message: "unauthorized",
+			});
+			return;
 		}
 
 		const userId = decoded.sub;

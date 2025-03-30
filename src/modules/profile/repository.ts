@@ -111,12 +111,15 @@ export async function updateProfileEmbedding(db: DB, userId: string, embeddings:
 }
 
 export async function createUserInterests(db: DB, userId: string, interestIds: string[]) {
-	return db.insert(userInterestInPrivate).values(
-		interestIds.map((interestId) => ({
-			userId,
-			interestId,
-		}))
-	);
+	return db
+		.insert(userInterestInPrivate)
+		.values(
+			interestIds.map((interestId) => ({
+				userId,
+				interestId,
+			}))
+		)
+		.onConflictDoNothing();
 }
 
 export async function deleteUserInterests(db: DB, userId: string) {
