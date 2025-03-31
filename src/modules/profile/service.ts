@@ -116,6 +116,13 @@ class ProfileService {
 	};
 
 	updateProfile = async (profile: UpdateProfileRequest, userId: string) => {
+		const user = await getUserById(userId);
+		const userMetaData = user.rawUserMetaData as any;
+
+		if (!profile.displayName) {
+			profile.displayName = userMetaData["name"];
+		}
+
 		await updateProfileRepo(db, profile, userId);
 		return this.getProfileWithInterestsByUserId(userId, userId);
 	};
